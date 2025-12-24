@@ -1,6 +1,6 @@
 ---
 name: resume-builder
-description: Create tailored, ATS-optimized resumes from LinkedIn PDF exports. Use when the user wants to generate a resume for a specific job role, provides a LinkedIn PDF, or mentions creating/updating a CV or resume.
+description: Create tailored, ATS-optimized resumes from LinkedIn PDF exports. Use when the user wants to generate a resume for a specific job role, provides a LinkedIn PDF, or mentions creating/updating a CV or resume. Supports --analyze flag for keyword match analysis.
 ---
 
 # Resume Builder Skill
@@ -12,6 +12,7 @@ You are an expert resume writer and career consultant. Your task is to create a 
 1. **LinkedIn PDF** - The user's LinkedIn profile exported as PDF
 2. **Job Description** - The target role's full job posting
 3. **Context** (optional) - Location, citizenship, company region, specific requirements
+4. **--analyze** (optional flag) - When specified, generate a keyword match report after the resume showing ATS optimization analysis
 
 ## Output Format
 
@@ -390,6 +391,128 @@ Generate HTML following this structure:
 
 ---
 
+## ATS Keyword Analysis (when --analyze flag is used)
+
+If the user includes `--analyze` in their request, generate a comprehensive keyword analysis report AFTER delivering the resume. This report helps the user understand how well their resume matches the job description.
+
+### Step 1: Extract Keywords from Job Description
+
+Identify and categorize keywords from the JD:
+
+1. **Hard Skills** - Technical skills, tools, technologies, methodologies
+   - Examples: Python, AWS, Agile, SQL, Machine Learning, Kubernetes
+
+2. **Soft Skills** - Interpersonal and behavioral competencies
+   - Examples: Leadership, Communication, Problem-solving, Collaboration
+
+3. **Industry Terms** - Domain-specific terminology and jargon
+   - Examples: SaaS, B2B, FinTech, Compliance, Due Diligence
+
+4. **Qualifications** - Required credentials, degrees, certifications
+   - Examples: MBA, PMP, CPA, Bachelor's degree, 5+ years experience
+
+5. **Action Verbs** - Key verbs indicating desired behaviors
+   - Examples: Lead, Develop, Implement, Optimize, Drive, Scale
+
+### Step 2: Analyze Keyword Presence in Resume
+
+For each extracted keyword, check:
+- Is it present in the generated resume?
+- How many times does it appear?
+- In which sections does it appear? (Summary, Experience, Skills, etc.)
+
+### Step 3: Generate the Analysis Report
+
+Present the analysis in this format:
+
+```
+═══════════════════════════════════════════════════════════════
+                    ATS KEYWORD ANALYSIS REPORT
+═══════════════════════════════════════════════════════════════
+
+📊 MATCH SUMMARY
+───────────────────────────────────────────────────────────────
+Keywords Found:     XX/YY (ZZ%)
+Hard Skills:        XX/YY matched
+Soft Skills:        XX/YY matched
+Industry Terms:     XX/YY matched
+Qualifications:     XX/YY matched
+
+Overall ATS Score:  [EXCELLENT/GOOD/NEEDS IMPROVEMENT]
+
+✅ KEYWORDS INCLUDED
+───────────────────────────────────────────────────────────────
+Hard Skills:
+  • Python (3x) - Summary, Experience, Skills
+  • AWS (2x) - Experience, Skills
+  • SQL (2x) - Experience, Skills
+
+Soft Skills:
+  • Leadership (2x) - Summary, Experience
+  • Communication (1x) - Experience
+
+Industry Terms:
+  • SaaS (2x) - Summary, Experience
+  • B2B (1x) - Experience
+
+❌ MISSING KEYWORDS
+───────────────────────────────────────────────────────────────
+High Priority (Required in JD):
+  • Kubernetes - Consider adding if you have experience
+  • Terraform - Add to skills if applicable
+
+Medium Priority (Preferred in JD):
+  • GraphQL - Mention if you have exposure
+
+Low Priority (Nice to have):
+  • Go/Golang - Optional, only if experienced
+
+💡 SUGGESTIONS FOR IMPROVEMENT
+───────────────────────────────────────────────────────────────
+1. Add "Kubernetes" to your skills section if you have container
+   orchestration experience
+
+2. Consider mentioning "Terraform" in your infrastructure-related
+   bullet points
+
+3. The keyword "scale" appears 3x in the JD - try incorporating
+   "scaled" or "scaling" in an achievement
+
+4. JD emphasizes "cross-functional collaboration" - consider adding
+   a bullet point highlighting this
+
+📈 KEYWORD DENSITY ANALYSIS
+───────────────────────────────────────────────────────────────
+Top JD Keywords by Frequency:
+  1. "data" (8x in JD) → Found 4x in resume ✓
+  2. "team" (6x in JD) → Found 3x in resume ✓
+  3. "scale" (5x in JD) → Found 1x in resume ⚠️
+  4. "product" (5x in JD) → Found 2x in resume ✓
+  5. "customer" (4x in JD) → Found 0x in resume ❌
+
+═══════════════════════════════════════════════════════════════
+```
+
+### Scoring Criteria
+
+Calculate the Overall ATS Score based on:
+
+| Score | Criteria |
+|-------|----------|
+| **EXCELLENT** (85%+) | Most required keywords present, good frequency, well-distributed across sections |
+| **GOOD** (70-84%) | Majority of keywords present, some gaps in preferred skills |
+| **NEEDS IMPROVEMENT** (<70%) | Missing several required keywords, low match rate |
+
+### Analysis Guidelines
+
+1. **Be specific** - Don't just say a keyword is missing; explain where it could be added
+2. **Prioritize** - Focus on required/must-have keywords over nice-to-haves
+3. **Be realistic** - Only suggest adding keywords the candidate actually has experience with (based on their LinkedIn)
+4. **Consider variations** - "ML" and "Machine Learning" count as the same keyword
+5. **Context matters** - Keywords in the Summary/Experience are weighted more than Skills section
+
+---
+
 ## Delivery Instructions
 
 1. Generate the complete HTML file
@@ -417,3 +540,21 @@ Generate HTML following this structure:
 5. Generate tailored HTML resume
 6. Save to output folder
 7. Provide print-to-PDF instructions
+
+---
+
+**User**: "Create a resume for this Software Engineer role at Google --analyze"
+
+**Response approach**:
+1. Read the provided LinkedIn PDF using the Read tool
+2. Analyze the job description for keywords and requirements
+3. Create a mental list of TOP 15-20 keywords that MUST appear
+4. Generate tailored HTML resume with keywords incorporated
+5. Save to output folder
+6. Provide print-to-PDF instructions
+7. Generate the ATS Keyword Analysis Report showing:
+   - Match summary with percentages
+   - Keywords included with frequency and locations
+   - Missing keywords categorized by priority
+   - Specific suggestions for improvement
+   - Keyword density analysis comparing JD to resume
