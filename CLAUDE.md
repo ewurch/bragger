@@ -1,0 +1,43 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+This is a resume builder project that generates tailored, ATS-optimized resumes from LinkedIn PDF exports. It uses the `/resume-builder` skill to create HTML resumes that can be printed to PDF.
+
+## Usage
+
+### Creating a Resume
+
+1. Provide a LinkedIn PDF export (e.g., `Profile-4.pdf`)
+2. Provide the target job description
+3. Optionally specify: location, citizenship, company region
+4. Run the `/resume-builder` skill
+
+The skill generates an HTML file in the `output/` directory with the naming convention `resume_[company]_[role].html`.
+
+### Converting to PDF
+
+Open the generated HTML in Chrome, then:
+- Print (Cmd+P)
+- Destination: "Save as PDF"
+- Margins: None
+- Enable: "Background graphics"
+- Disable: "Headers and footers"
+
+## Issue Tracking
+
+This project uses **bd (beads)** for issue tracking.
+Run `bd prime` for workflow context, or install hooks (`bd hooks install`) for auto-injection.
+
+**Quick reference:**
+- `bd ready` - Find unblocked work
+- `bd create "Title" --type task --priority 2` - Create issue
+- `bd close <id>` - Complete work
+- `bd sync` - Sync with git (run at session end)
+
+## Directory Structure
+
+- `output/` - Generated HTML resumes and cover letters
+- `.claude/skills/resume-builder/` - The resume builder skill definition
