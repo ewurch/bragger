@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eduardo Wurch - Software Engineer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.45;
+            color: #2d2d2d;
+            background: white;
+        }
+
+        @media print {
+            body {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0;
+                padding: 12mm 14mm;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+
+        @media screen {
+            body {
+                max-width: 210mm;
+                margin: 20px auto;
+                padding: 12mm 14mm;
+                box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #6366f1;
+        }
+
+        .name {
+            font-size: 26pt;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .title {
+            font-size: 12pt;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .contact-info {
+            font-size: 9.5pt;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .contact-row {
+            margin-bottom: 2px;
+        }
+
+        .contact-info span {
+            margin: 0 6px;
+        }
+
+        .citizenship {
+            display: inline-block;
+            background: #eef2ff;
+            color: #4338ca;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 9pt;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .section {
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #4338ca;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid #e0e7ff;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        .summary {
+            font-size: 10pt;
+            color: #3d3d3d;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .experience-item {
+            margin-bottom: 12px;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .job-title-company {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .job-title {
+            font-weight: 700;
+            font-size: 10.5pt;
+            color: #1a202c;
+        }
+
+        .company {
+            font-weight: 600;
+            color: #4338ca;
+            font-size: 10.5pt;
+        }
+
+        .job-meta {
+            font-size: 9.5pt;
+            color: #718096;
+            font-style: italic;
+        }
+
+        .job-bullets {
+            margin-top: 4px;
+            padding-left: 16px;
+        }
+
+        .job-bullets li {
+            margin-bottom: 3px;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 0 2px;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .skills-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .skills-group-title {
+            font-weight: 600;
+            font-size: 9.5pt;
+            color: #4a5568;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skill-tag {
+            background: #eef2ff;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 9pt;
+            color: #3730a3;
+        }
+
+        .skill-tag.primary {
+            background: #4338ca;
+            color: white;
+            font-weight: 600;
+        }
+
+        .education-item {
+            margin-bottom: 6px;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .degree {
+            font-weight: 600;
+            font-size: 10pt;
+        }
+
+        .institution {
+            color: #4a5568;
+            font-size: 10pt;
+        }
+
+        .edu-meta {
+            font-size: 9pt;
+            color: #718096;
+            font-style: italic;
+        }
+
+        .languages-list {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .language-item {
+            font-size: 10pt;
+        }
+
+        .language-name {
+            font-weight: 600;
+        }
+
+        .language-level {
+            color: #718096;
+            font-size: 9pt;
+        }
+
+        .certifications-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cert-tag {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 9pt;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="name">Eduardo Wurch</div>
+        <div class="title">Full-Stack Software Engineer | AI Systems & Agentic Workflows</div>
+        <div class="contact-info">
+            <div class="contact-row">
+                <span>ewurch@gmail.com</span> |
+                <span>+55 51 99322-7244</span>
+            </div>
+            <div class="contact-row">
+                <span>linkedin.com/in/eduardowurch</span> |
+                <span>github.com/ewurch</span>
+            </div>
+            <div class="citizenship">Italian Citizen - EU Work Authorization</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Professional Summary</div>
+        <p class="summary">
+            Full-stack Software Engineer with hands-on experience building agentic AI systems and LLM-based applications. Currently designing multi-step AI agent orchestration at Labrynth, with deep expertise in Python, TypeScript, React, and FastAPI. Co-founder of a software consultancy where I architect end-to-end digital products. Passionate about early-stage environments where I can shape technical direction and build foundational systems from the ground up.
+        </p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Work Experience</div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">AI Engineer</span> |
+                    <span class="company">Labrynth</span>
+                </div>
+                <div class="job-meta">San Francisco, CA (Remote) | Aug 2025 - Present</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Design and maintain scalable AI systems that process multimodal unstructured data and orchestrate <strong>multi-step AI agents</strong> using Python</li>
+                <li>Lead end-to-end development of <strong>agentic AI workflows</strong> for core company products, architecting the agent orchestration layer</li>
+                <li>Build evaluation pipelines using <strong>Pydantic</strong> for data validation, assessing agent performance and guiding model selection</li>
+                <li>Implement <strong>LLM-based</strong> systems with focus on reliability, observability, and production-grade performance</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Co-Founder & Technical Leader</span> |
+                    <span class="company">Parka</span>
+                </div>
+                <div class="job-meta">Porto Alegre, Brazil | Jul 2024 - Present</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Co-founded and lead technical direction for a software consultancy, building full-stack applications from zero to production</li>
+                <li>Develop applications using <strong>Python, TypeScript, Django, FastAPI, NextJS, and React</strong> - full ownership of technical stack decisions</li>
+                <li>Architect end-to-end digital solutions for clients, handling everything from database design (<strong>PostgreSQL</strong>) to frontend implementation</li>
+                <li>Wear multiple hats in a small team: engineering, architecture, client communication, and technical strategy</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Software Engineer</span> |
+                    <span class="company">Swisscom</span>
+                </div>
+                <div class="job-meta">Rotterdam, Netherlands | Mar 2023 - Aug 2024</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Designed and developed high-performance backend APIs using <strong>Python and FastAPI</strong> with <strong>Pydantic</strong> for data validation</li>
+                <li>Practiced Test-Driven Development (TDD), ensuring code quality and maintainability across the engineering team</li>
+                <li>Collaborated with distributed teams across Europe, contributing to shared component libraries and internal tooling</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Machine Learning Engineer</span> |
+                    <span class="company">BoletoFlex</span>
+                </div>
+                <div class="job-meta">Florianopolis, Brazil | Oct 2021 - Jul 2022</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Architected and implemented <strong>FastAPI</strong> microservices handling high-volume financial transaction validation</li>
+                <li>Built ML models (XGBoost, PyTorch) that automated credit approval from 0% to 50%+ with ~0% increase in default rates</li>
+                <li>Early engineering team member - contributed to foundational architecture and technical decision-making</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Data Scientist</span> |
+                    <span class="company">Sicredi</span>
+                </div>
+                <div class="job-meta">Porto Alegre, Brazil | Sep 2019 - Oct 2021</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Built institution's first ML credit model, reducing 96% of manual processes - demonstrated ability to deliver high-impact solutions</li>
+                <li>Created real-time dashboards using Python (Dash/Plotly) for monitoring critical business metrics</li>
+                <li>Led adoption of software engineering best practices: version control, containerization, documentation standards</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Technical Skills</div>
+        <div class="skills-container">
+            <div class="skills-group">
+                <div class="skills-group-title">Core Stack</div>
+                <div class="skills-list">
+                    <span class="skill-tag primary">Python</span>
+                    <span class="skill-tag primary">TypeScript</span>
+                    <span class="skill-tag primary">React</span>
+                    <span class="skill-tag primary">FastAPI</span>
+                    <span class="skill-tag primary">Pydantic</span>
+                </div>
+            </div>
+            <div class="skills-group">
+                <div class="skills-group-title">AI/ML</div>
+                <div class="skills-list">
+                    <span class="skill-tag">Agentic AI</span>
+                    <span class="skill-tag">LLM Applications</span>
+                    <span class="skill-tag">PyTorch</span>
+                    <span class="skill-tag">AI Orchestration</span>
+                </div>
+            </div>
+            <div class="skills-group">
+                <div class="skills-group-title">Infrastructure</div>
+                <div class="skills-list">
+                    <span class="skill-tag">PostgreSQL</span>
+                    <span class="skill-tag">GCP</span>
+                    <span class="skill-tag">Docker</span>
+                    <span class="skill-tag">Microservices</span>
+                </div>
+            </div>
+            <div class="skills-group">
+                <div class="skills-group-title">Frontend</div>
+                <div class="skills-list">
+                    <span class="skill-tag">NextJS</span>
+                    <span class="skill-tag">Django</span>
+                    <span class="skill-tag">HTMX</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Education</div>
+        <div class="education-item">
+            <div class="flex-between">
+                <div>
+                    <span class="degree">Bachelor's Degree in Actuarial Science</span> -
+                    <span class="institution">Universidade Federal do Rio Grande do Sul</span>
+                </div>
+                <div class="edu-meta">2015 - 2021</div>
+            </div>
+        </div>
+        <div class="education-item">
+            <div class="flex-between">
+                <div>
+                    <span class="degree">Exchange Program</span> -
+                    <span class="institution">ISCTE Business School, Lisbon</span>
+                </div>
+                <div class="edu-meta">2017</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Languages</div>
+        <div class="languages-list">
+            <div class="language-item">
+                <span class="language-name">English</span>
+                <span class="language-level">- Native/Bilingual</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Portuguese</span>
+                <span class="language-level">- Native</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Spanish</span>
+                <span class="language-level">- Professional</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Certifications</div>
+        <div class="certifications-list">
+            <span class="cert-tag">Machine Learning</span>
+            <span class="cert-tag">Deep Learning for Coders</span>
+        </div>
+    </div>
+
+</body>
+</html>

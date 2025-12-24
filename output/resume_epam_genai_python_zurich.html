@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eduardo Wurch - Python Developer GenAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.45;
+            color: #2d2d2d;
+            background: white;
+        }
+
+        @media print {
+            body {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0;
+                padding: 12mm 14mm;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+
+        @media screen {
+            body {
+                max-width: 210mm;
+                margin: 20px auto;
+                padding: 12mm 14mm;
+                box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #0f766e;
+        }
+
+        .name {
+            font-size: 26pt;
+            font-weight: 700;
+            color: #134e4a;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .title {
+            font-size: 12pt;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .contact-info {
+            font-size: 9.5pt;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .contact-row {
+            margin-bottom: 2px;
+        }
+
+        .contact-info span {
+            margin: 0 6px;
+        }
+
+        .citizenship {
+            display: inline-block;
+            background: #f0fdfa;
+            color: #0f766e;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 9pt;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .section {
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #0f766e;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid #ccfbf1;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        .summary {
+            font-size: 10pt;
+            color: #3d3d3d;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .experience-item {
+            margin-bottom: 12px;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .job-title-company {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .job-title {
+            font-weight: 700;
+            font-size: 10.5pt;
+            color: #1a202c;
+        }
+
+        .company {
+            font-weight: 600;
+            color: #0f766e;
+            font-size: 10.5pt;
+        }
+
+        .job-meta {
+            font-size: 9.5pt;
+            color: #718096;
+            font-style: italic;
+        }
+
+        .job-bullets {
+            margin-top: 4px;
+            padding-left: 16px;
+        }
+
+        .job-bullets li {
+            margin-bottom: 3px;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .skills-group {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .skills-group-title {
+            font-weight: 600;
+            font-size: 9.5pt;
+            color: #4a5568;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .skill-tag {
+            background: #f0fdfa;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 9pt;
+            color: #134e4a;
+        }
+
+        .skill-tag.primary {
+            background: #0f766e;
+            color: white;
+            font-weight: 600;
+        }
+
+        .education-item {
+            margin-bottom: 6px;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .degree {
+            font-weight: 600;
+            font-size: 10pt;
+        }
+
+        .institution {
+            color: #4a5568;
+            font-size: 10pt;
+        }
+
+        .edu-meta {
+            font-size: 9pt;
+            color: #718096;
+            font-style: italic;
+        }
+
+        .languages-list {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .language-item {
+            font-size: 10pt;
+        }
+
+        .language-name {
+            font-weight: 600;
+        }
+
+        .language-level {
+            color: #718096;
+            font-size: 9pt;
+        }
+
+        .certifications-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cert-tag {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 9pt;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="name">Eduardo Wurch</div>
+        <div class="title">Python Developer | Generative AI & LLM Solutions</div>
+        <div class="contact-info">
+            <div class="contact-row">
+                <span>ewurch@gmail.com</span> |
+                <span>+55 51 99322-7244</span>
+            </div>
+            <div class="contact-row">
+                <span>linkedin.com/in/eduardowurch</span> |
+                <span>github.com/ewurch</span>
+            </div>
+            <div class="citizenship">Italian/EU Citizen - Swiss Work Authorization</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Professional Summary</div>
+        <p class="summary">
+            Python Developer with 5+ years of production experience specializing in Generative AI and LLM-based solutions. Currently building agentic AI workflows with RAG pipelines, function calling, and multi-step agent orchestration. Strong background in financial services including banking and credit systems. Experienced in end-to-end delivery of GenAI solutions using FastAPI, with proven ability to optimize model performance and engage with business stakeholders. Complementary skills in ReactJS for full-stack delivery.
+        </p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Work Experience</div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">AI Engineer</span> |
+                    <span class="company">Labrynth</span>
+                </div>
+                <div class="job-meta">San Francisco, CA (Remote) | Aug 2025 - Present</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Design and implement <strong>GenAI agentic solutions</strong> that orchestrate multi-step AI agents with <strong>RAG pipelines</strong> and <strong>function calling</strong></li>
+                <li>Build production-grade <strong>LLM-based applications</strong> processing multimodal unstructured data for enterprise use cases</li>
+                <li>Develop evaluation pipelines to <strong>optimize GenAI solution performance</strong>, guiding model selection and prompt engineering strategies</li>
+                <li>Own and deliver features end-to-end, from architectural design through production deployment</li>
+                <li>Implement <strong>agentic workflows</strong> leveraging language models and transformer architectures</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Co-Founder & Technical Leader</span> |
+                    <span class="company">Parka</span>
+                </div>
+                <div class="job-meta">Porto Alegre, Brazil | Jul 2024 - Present</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Develop full-stack applications using <strong>Python (Django, FastAPI)</strong> and <strong>ReactJS</strong> with TypeScript</li>
+                <li>Design and implement <strong>REST APIs</strong> following production-grade standards with comprehensive documentation</li>
+                <li>Engage directly with business stakeholders to gather requirements, present deliverables, and iterate on solutions</li>
+                <li>Manage cloud environments and <strong>Docker</strong> containerization for deployment pipelines</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Software Engineer</span> |
+                    <span class="company">Swisscom</span>
+                </div>
+                <div class="job-meta">Rotterdam, Netherlands | Mar 2023 - Aug 2024</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Designed and developed high-performance <strong>REST APIs using FastAPI</strong> and Python for enterprise telecommunications platform</li>
+                <li>Implemented Test-Driven Development ensuring code quality, reliability, and maintainability standards</li>
+                <li>Participated in architectural decision-making for new application patterns and shared component libraries</li>
+                <li>Collaborated with distributed teams using <strong>Git</strong> workflows and code review processes</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Machine Learning Engineer</span> |
+                    <span class="company">BoletoFlex</span>
+                </div>
+                <div class="job-meta">Florianopolis, Brazil | Oct 2021 - Jul 2022</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Architected <strong>FastAPI</strong> microservices for identity validation handling high-volume financial transactions</li>
+                <li>Developed <strong>deep learning</strong> models using <strong>PyTorch</strong> for computer vision fraud detection, outperforming market alternatives</li>
+                <li>Built XGBoost credit scoring models automating approval process from 0% to 50%+ with minimal default rate impact</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Data Scientist</span> |
+                    <span class="company">Sicredi</span> (Financial Cooperative)
+                </div>
+                <div class="job-meta">Porto Alegre, Brazil | Sep 2019 - Oct 2021</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Built the institution's first ML model for <strong>banking</strong> credit granting, reducing 96% of manual processes</li>
+                <li>Created real-time monitoring dashboards for tracking default rates and business KPIs</li>
+                <li>Implemented software engineering best practices: <strong>Docker</strong> containerization, <strong>Git</strong> version control, documentation</li>
+                <li>Presented analytical deliverables to business stakeholders, translating technical insights into actionable decisions</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="job-header">
+                <div class="job-title-company">
+                    <span class="job-title">Risk Analyst</span> |
+                    <span class="company">Santander Brasil</span>
+                </div>
+                <div class="job-meta">Porto Alegre, Brazil | Jan 2019 - Sep 2019</div>
+            </div>
+            <ul class="job-bullets">
+                <li>Created quantitative models for credit risk analysis in <strong>banking</strong> loan portfolio management</li>
+                <li>Performed credit operations analysis supporting strategic decisions for regional portfolios</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Technical Skills</div>
+        <div class="skills-container">
+            <div class="skills-group">
+                <div class="skills-group-title">Core Python</div>
+                <div class="skills-list">
+                    <span class="skill-tag primary">Python 5+ yrs</span>
+                    <span class="skill-tag primary">FastAPI</span>
+                    <span class="skill-tag primary">Django</span>
+                    <span class="skill-tag">Flask</span>
+                    <span class="skill-tag">Pydantic</span>
+                </div>
+            </div>
+            <div class="skills-group">
+                <div class="skills-group-title">GenAI & LLM</div>
+                <div class="skills-list">
+                    <span class="skill-tag primary">Agentic Workflows</span>
+                    <span class="skill-tag primary">RAG</span>
+                    <span class="skill-tag">Function Calling</span>
+                    <span class="skill-tag">Prompting</span>
+                    <span class="skill-tag">LLM Optimization</span>
+                </div>
+            </div>
+            <div class="skills-group">
+                <div class="skills-group-title">Deep Learning</div>
+                <div class="skills-list">
+                    <span class="skill-tag primary">PyTorch</span>
+                    <span class="skill-tag">Transformers</span>
+                    <span class="skill-tag">XGBoost</span>
+                    <span class="skill-tag">Computer Vision</span>
+                </div>
+            </div>
+            <div class="skills-group">
+                <div class="skills-group-title">Infrastructure</div>
+                <div class="skills-list">
+                    <span class="skill-tag primary">Docker</span>
+                    <span class="skill-tag primary">Git</span>
+                    <span class="skill-tag">GCP</span>
+                    <span class="skill-tag">PostgreSQL</span>
+                    <span class="skill-tag">REST APIs</span>
+                </div>
+            </div>
+            <div class="skills-group">
+                <div class="skills-group-title">Frontend</div>
+                <div class="skills-list">
+                    <span class="skill-tag">ReactJS</span>
+                    <span class="skill-tag">TypeScript</span>
+                    <span class="skill-tag">NextJS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Education</div>
+        <div class="education-item">
+            <div class="flex-between">
+                <div>
+                    <span class="degree">Bachelor's Degree in Actuarial Science</span> -
+                    <span class="institution">Universidade Federal do Rio Grande do Sul</span>
+                </div>
+                <div class="edu-meta">2015 - 2021</div>
+            </div>
+        </div>
+        <div class="education-item">
+            <div class="flex-between">
+                <div>
+                    <span class="degree">Exchange Program, International Economics</span> -
+                    <span class="institution">ISCTE Business School, Lisbon</span>
+                </div>
+                <div class="edu-meta">2017</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Certifications</div>
+        <div class="certifications-list">
+            <span class="cert-tag">Machine Learning</span>
+            <span class="cert-tag">Deep Learning for Coders</span>
+            <span class="cert-tag">Credit Risk Management</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Languages</div>
+        <div class="languages-list">
+            <div class="language-item">
+                <span class="language-name">English</span>
+                <span class="language-level">- Native/Bilingual</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Portuguese</span>
+                <span class="language-level">- Native</span>
+            </div>
+            <div class="language-item">
+                <span class="language-name">Spanish</span>
+                <span class="language-level">- Professional</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

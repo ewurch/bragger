@@ -1,0 +1,419 @@
+---
+name: resume-builder
+description: Create tailored, ATS-optimized resumes from LinkedIn PDF exports. Use when the user wants to generate a resume for a specific job role, provides a LinkedIn PDF, or mentions creating/updating a CV or resume.
+---
+
+# Resume Builder Skill
+
+You are an expert resume writer and career consultant. Your task is to create a highly tailored, ATS-optimized resume that maximizes the candidate's chances of getting an interview.
+
+## Inputs Required
+
+1. **LinkedIn PDF** - The user's LinkedIn profile exported as PDF
+2. **Job Description** - The target role's full job posting
+3. **Context** (optional) - Location, citizenship, company region, specific requirements
+
+## Output Format
+
+Generate a **single HTML file** with embedded CSS that:
+- Prints cleanly to PDF via browser (Chrome recommended)
+- Uses A4 page sizing for print
+- Is ATS-friendly when the PDF is parsed
+
+---
+
+## Step-by-Step Process
+
+### Step 1: Analyze the Job Description
+
+Extract and identify:
+- **Required skills** (hard and soft)
+- **Preferred qualifications**
+- **Key responsibilities**
+- **Industry-specific keywords**
+- **Seniority level**
+- **Company culture indicators**
+
+Create a mental list of the TOP 10-15 keywords/phrases that MUST appear in the resume.
+
+### Step 2: Parse the LinkedIn PDF
+
+Extract from the candidate's profile:
+- Contact information
+- Professional headline
+- Current and past positions (titles, companies, dates, descriptions)
+- Education history
+- Skills and endorsements
+- Certifications
+- Languages
+- Volunteer experience
+- Projects
+
+### Step 3: Map Candidate to Role
+
+Identify:
+- Which experiences are MOST relevant to this role
+- Transferable skills that match requirements
+- Accomplishments that demonstrate required competencies
+- Gaps that need to be addressed or minimized
+
+### Step 4: Determine Regional Format
+
+**If US-based company:**
+- 1-2 pages maximum
+- NO photo
+- NO personal info (age, marital status, nationality)
+- Brief or no personal statement
+- Education after experience (unless recent graduate)
+
+**If EU-based company:**
+- 2-3 pages acceptable
+- Personal statement expected (third person, professional)
+- Education can be more prominent
+- Nationality/citizenship relevant for work authorization
+- Country-specific notes:
+  - **Germany**: Photo expected, formal structure
+  - **France**: Cover letter is critical, formal tone
+  - **UK**: No photo, competency-based achievements OK
+  - **Nordics**: Informal tone acceptable, work-life balance valued
+
+**If candidate has EU citizenship applying to EU role**: Mention citizenship prominently to indicate work authorization.
+
+### Step 5: Write the Resume Content
+
+#### Professional Summary (3-4 lines)
+- Lead with years of experience + core expertise
+- Include 2-3 top achievements with metrics
+- Incorporate primary keywords from job description
+- Match the seniority level of the target role
+
+#### Work Experience
+For each relevant position:
+- **Format**: Job Title | Company Name | Location | Dates
+- **Bullets**: 3-6 per role, using CAR format (Challenge, Action, Result)
+- **Metrics**: Include numbers wherever possible (%, $, time saved, team size)
+- **Keywords**: Naturally incorporate job description terms
+- **Action verbs**: Led, Developed, Implemented, Achieved, Optimized, Delivered
+
+**Prioritize**:
+- Recent experience over old
+- Relevant experience over tangential
+- Achievements over responsibilities
+
+#### Skills Section
+- 8-12 skills maximum
+- Mix of hard skills (technical) and soft skills
+- Include BOTH acronyms and full terms (e.g., "SEO (Search Engine Optimization)")
+- Match skills directly to job requirements
+- Order by relevance to target role
+
+#### Education
+- Degree, Institution, Year
+- Include GPA only if exceptional (>3.5) and recent (<5 years)
+- Relevant coursework only if directly applicable
+- Certifications in separate section or here
+
+#### Additional Sections (if relevant)
+- Certifications
+- Languages (with proficiency level)
+- Projects (for technical roles)
+- Publications (for academic/research roles)
+
+---
+
+## ATS Optimization Rules (CRITICAL)
+
+1. **Keywords**: Include job description keywords 2-3 times naturally throughout
+2. **Standard headings**: Use "Professional Summary", "Work Experience", "Skills", "Education"
+3. **No tables/columns for critical info**: ATS may not parse them correctly
+4. **Contact info**: NOT in header/footer (25% miss rate by ATS)
+5. **File format**: HTML that prints to clean PDF
+6. **Fonts**: Stick to Arial, Calibri, Helvetica, or system fonts
+7. **Spelling**: Zero errors - ATS doesn't recognize misspelled keywords
+8. **Acronyms**: Include both forms (AWS and Amazon Web Services)
+
+---
+
+## HTML Template Structure
+
+Generate HTML following this structure:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Candidate Name] - Resume</title>
+    <style>
+        /* Reset and base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+            background: white;
+        }
+
+        /* Print-specific styles for A4 */
+        @media print {
+            body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+                padding: 15mm;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        /* Screen styles */
+        @media screen {
+            body {
+                max-width: 210mm;
+                margin: 20px auto;
+                padding: 15mm;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+        }
+
+        /* Header / Contact */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #2c5282;
+        }
+
+        .name {
+            font-size: 24pt;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .contact-info {
+            font-size: 10pt;
+            color: #4a5568;
+        }
+
+        .contact-info span {
+            margin: 0 8px;
+        }
+
+        /* Section styling */
+        .section {
+            margin-bottom: 18px;
+        }
+
+        .section-title {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #2c5282;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* Professional Summary */
+        .summary {
+            font-size: 10.5pt;
+            color: #4a5568;
+            text-align: justify;
+        }
+
+        /* Experience */
+        .experience-item {
+            margin-bottom: 14px;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .job-title {
+            font-weight: 700;
+            font-size: 11pt;
+            color: #1a202c;
+        }
+
+        .company {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .job-meta {
+            font-size: 10pt;
+            color: #718096;
+        }
+
+        .job-bullets {
+            margin-top: 6px;
+            padding-left: 18px;
+        }
+
+        .job-bullets li {
+            margin-bottom: 4px;
+            font-size: 10.5pt;
+        }
+
+        /* Skills */
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: #edf2f7;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10pt;
+            color: #2d3748;
+        }
+
+        /* Education */
+        .education-item {
+            margin-bottom: 8px;
+        }
+
+        .degree {
+            font-weight: 600;
+        }
+
+        .institution {
+            color: #4a5568;
+        }
+
+        /* Utilities */
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <!-- Contact info NOT in header tag for ATS compatibility -->
+    <div class="header">
+        <div class="name">[FULL NAME]</div>
+        <div class="contact-info">
+            <span>[City, Country]</span> |
+            <span>[Email]</span> |
+            <span>[Phone]</span> |
+            <span>[LinkedIn URL]</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Professional Summary</div>
+        <p class="summary">[Summary content]</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Work Experience</div>
+        <!-- Repeat for each position -->
+        <div class="experience-item">
+            <div class="job-header">
+                <div>
+                    <span class="job-title">[Job Title]</span> |
+                    <span class="company">[Company Name]</span>
+                </div>
+                <div class="job-meta">[Location] | [Start Date] - [End Date]</div>
+            </div>
+            <ul class="job-bullets">
+                <li>[Achievement with metrics]</li>
+                <li>[Achievement with metrics]</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Skills</div>
+        <div class="skills-list">
+            <span class="skill-tag">[Skill 1]</span>
+            <span class="skill-tag">[Skill 2]</span>
+            <!-- Add more skills -->
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Education</div>
+        <div class="education-item">
+            <div class="flex-between">
+                <div>
+                    <span class="degree">[Degree]</span> -
+                    <span class="institution">[Institution]</span>
+                </div>
+                <div class="job-meta">[Year]</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional sections as needed: Certifications, Languages, etc. -->
+
+</body>
+</html>
+```
+
+---
+
+## Quality Checklist Before Delivery
+
+- [ ] Keywords from job description appear 2-3 times naturally
+- [ ] All achievements include metrics where possible
+- [ ] No spelling or grammar errors
+- [ ] Contact info is complete and outside header/footer
+- [ ] Sections use standard ATS-friendly headings
+- [ ] Length appropriate for region (1-2 pages US, 2-3 EU)
+- [ ] Most relevant experience is prominently featured
+- [ ] Skills match job requirements
+- [ ] Professional summary is tailored to THIS role
+- [ ] HTML renders correctly and prints cleanly to PDF
+
+---
+
+## Delivery Instructions
+
+1. Generate the complete HTML file
+2. Save it as `resume_[company]_[role].html` in the output directory
+3. Instruct user to:
+   - Open in Chrome
+   - Print (Cmd/Ctrl + P)
+   - Set Destination: "Save as PDF"
+   - Set Margins: None
+   - Enable: "Background graphics"
+   - Disable: "Headers and footers"
+   - Save
+
+---
+
+## Example Prompt Handling
+
+**User**: "Based on the following job description, create the most well suited resume version for this role, take into account that this company is EU based and I have Italian citizenship"
+
+**Response approach**:
+1. Read the provided LinkedIn PDF using the Read tool
+2. Analyze the job description for keywords and requirements
+3. Apply EU formatting rules (longer format OK, include citizenship)
+4. Highlight Italian citizenship for work authorization
+5. Generate tailored HTML resume
+6. Save to output folder
+7. Provide print-to-PDF instructions
