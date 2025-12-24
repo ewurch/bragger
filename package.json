@@ -1,0 +1,12 @@
+{
+  "name": "resume-builder",
+  "version": "1.0.0",
+  "description": "Resume builder with PDF export",
+  "type": "module",
+  "scripts": {
+    "pdf": "node scripts/html-to-pdf.js"
+  },
+  "dependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}

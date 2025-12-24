@@ -387,21 +387,81 @@ Generate HTML following this structure:
 - [ ] Skills match job requirements
 - [ ] Professional summary is tailored to THIS role
 - [ ] HTML renders correctly and prints cleanly to PDF
+- [ ] **Keyword analysis report shown to user**
+- [ ] **User offered chance to revise for missing keywords**
 
 ---
 
 ## Delivery Instructions
 
 1. Generate the complete HTML file
-2. Save it as `resume_[company]_[role].html` in the output directory
-3. Instruct user to:
-   - Open in Chrome
-   - Print (Cmd/Ctrl + P)
-   - Set Destination: "Save as PDF"
-   - Set Margins: None
-   - Enable: "Background graphics"
-   - Disable: "Headers and footers"
-   - Save
+2. Create directory `outputs/[company]_[role]/` (e.g., `outputs/epam_genai_python/`)
+3. Save the file as `resume.html` inside that directory
+4. Instruct user to generate PDF:
+   ```
+   npm run pdf outputs/[company]_[role]/resume.html
+   ```
+
+---
+
+## Step 6: Keyword Analysis (ALWAYS RUN)
+
+After generating the resume, **always** perform keyword analysis and show the report to the user.
+
+### 6.1 Extract Keywords from Job Description
+
+Identify and categorize all important terms from the JD:
+
+| Category | Examples |
+|----------|----------|
+| **Technical Skills** | Python, AWS, Kubernetes, React, SQL |
+| **Tools/Platforms** | Jira, GitHub, Figma, Salesforce |
+| **Methodologies** | Agile, Scrum, TDD, CI/CD |
+| **Soft Skills** | Leadership, Communication, Problem-solving |
+| **Domain Terms** | Machine Learning, FinTech, SaaS, B2B |
+| **Qualifications** | Bachelor's, 5+ years, Senior, Certified |
+
+### 6.2 Scan the Generated Resume
+
+Count occurrences of each keyword in the resume (case-insensitive).
+
+### 6.3 Generate the Analysis Report
+
+Present the report in this format:
+
+```
+## Keyword Analysis Report
+
+### Match Score: X/Y keywords (Z%)
+
+### Found Keywords (with frequency)
+| Keyword | Count | Category |
+|---------|-------|----------|
+| Python | 4 | Technical |
+| AWS | 2 | Technical |
+| Leadership | 3 | Soft Skill |
+...
+
+### Missing Keywords
+| Keyword | Category | Suggestion |
+|---------|----------|------------|
+| Kubernetes | Technical | Add to Skills section or mention in Labrynth role |
+| Agile | Methodology | Include in work experience bullets |
+| CI/CD | Technical | Mention in MLOps context |
+...
+
+### Recommendations
+1. **Add "Kubernetes"** - Mentioned 3x in JD. Consider adding to Skills or describing container orchestration experience.
+2. **Include "Agile"** - JD emphasizes agile methodology. Add to a work experience bullet.
+3. **Strengthen "CI/CD"** - Only appears once. Add another mention in a different role.
+```
+
+### 6.4 Offer to Revise
+
+After showing the report, ask:
+> "Would you like me to revise the resume to incorporate any of the missing keywords?"
+
+If yes, update the resume and regenerate the analysis to confirm improvement.
 
 ---
 
@@ -415,5 +475,8 @@ Generate HTML following this structure:
 3. Apply EU formatting rules (longer format OK, include citizenship)
 4. Highlight Italian citizenship for work authorization
 5. Generate tailored HTML resume
-6. Save to output folder
-7. Provide print-to-PDF instructions
+6. Create outputs/[company]_[role]/ directory
+7. Save as resume.html
+8. **Run keyword analysis and show report**
+9. Offer to revise if missing keywords
+10. Provide PDF generation command

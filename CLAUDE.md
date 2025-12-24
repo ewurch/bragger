@@ -37,7 +37,28 @@ Run `bd prime` for workflow context, or install hooks (`bd hooks install`) for a
 - `bd close <id>` - Complete work
 - `bd sync` - Sync with git (run at session end)
 
+## Content Rules
+
+**NEVER use em-dashes (—) in any generated content.** Use alternatives instead:
+- Use a regular hyphen with spaces: ` - `
+- Use a colon: `:`
+- Restructure the sentence
+
+This applies to all skills, resumes, cover letters, and any generated text.
+
 ## Directory Structure
 
-- `output/` - Generated HTML resumes and cover letters
-- `.claude/skills/resume-builder/` - The resume builder skill definition
+- `outputs/[company]_[role]/` - Generated files per job application
+  - `resume.html` / `resume.pdf`
+  - `cover_letter.html` / `cover_letter.pdf`
+- `output/` - Legacy files (pre-restructure)
+- `scripts/` - CLI tools (html-to-pdf.js)
+- `.claude/skills/` - Skill definitions
+
+## PDF Generation
+
+After generating HTML files, convert to PDF:
+```bash
+npm install                                    # First time only
+npm run pdf outputs/company_role/resume.html   # Convert single file
+```
