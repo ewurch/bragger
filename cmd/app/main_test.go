@@ -555,4 +555,362 @@ func TestCLIHelp(t *testing.T) {
 	if !strings.Contains(output, "update app-a1b2c3d4 --status") {
 		t.Errorf("expected update flag example in help, got: %s", output)
 	}
+
+	// Check that kb command is documented
+	if !strings.Contains(output, "kb <subcommand>") {
+		t.Errorf("expected kb command in help, got: %s", output)
+	}
+}
+
+// Helper to extract kb ID from add command output
+func extractKBID(output string) string {
+	lines := strings.Split(output, "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "ID:") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "ID:"))
+		}
+	}
+	return ""
+}
+
+func TestKBHelp(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	output, _ := runApp(t, workDir, "kb")
+	// Should show help when no subcommand
+
+	expectedStrings := []string{
+		"app kb <subcommand>",
+		"--type",
+		"--category",
+		"--data",
+		"--content",
+	}
+
+	for _, s := range expectedStrings {
+		if !strings.Contains(output, s) {
+			t.Errorf("expected kb help to contain %q", s)
+		}
+	}
+}
+
+func TestKBAddProfile(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	// Create KB file
+	kbPath := filepath.Join(workDir, "candidate-kb.jsonl")
+	os.WriteFile(kbPath, []byte{}, 0644)
+
+	t.Run("add contact", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "profile",
+			"--category", "contact",
+			"--source", "test",
+			"--data", `{"name":"John Doe","email":"john@example.com"}`)
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Entry added successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+		if !strings.Contains(output, "kb-") {
+			t.Errorf("expected kb ID in output, got: %s", output)
+		}
+	})
+
+	t.Run("add experience", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "profile",
+			"--category", "experience",
+			"--source", "cv-import",
+			"--data", `{"company":"Acme Corp","role":"Senior Engineer","start_date":"2020-01"}`)
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Entry added successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+	})
+
+	t.Run("add skills", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "profile",
+			"--category", "skills",
+			"--data", `{"languages":["Go","Python"],"frameworks":["React"]}`)
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Entry added successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+	})
+}
+
+func TestKBAddContext(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	kbPath := filepath.Join(workDir, "candidate-kb.jsonl")
+	os.WriteFile(kbPath, []byte{}, 0644)
+
+	t.Run("add achievement", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "context",
+			"--category", "achievement",
+			"--source", "user",
+			"--content", "Led migration to microservices, reducing latency by 40%")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Entry added successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+		if !strings.Contains(output, "context") {
+			t.Errorf("expected type context in output, got: %s", output)
+		}
+	})
+}
+
+func TestKBAddErrors(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	kbPath := filepath.Join(workDir, "candidate-kb.jsonl")
+	os.WriteFile(kbPath, []byte{}, 0644)
+
+	t.Run("missing type", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--category", "contact",
+			"--data", `{"name":"John","email":"j@e.com"}`)
+		if err == nil {
+			t.Error("expected error when type is missing")
+		}
+		if !strings.Contains(output, "--type is required") {
+			t.Errorf("expected type error, got: %s", output)
+		}
+	})
+
+	t.Run("invalid type", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "invalid",
+			"--category", "contact",
+			"--data", `{"name":"John"}`)
+		if err == nil {
+			t.Error("expected error for invalid type")
+		}
+		if !strings.Contains(output, "--type must be") {
+			t.Errorf("expected type error, got: %s", output)
+		}
+	})
+
+	t.Run("missing category", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "profile",
+			"--data", `{"name":"John"}`)
+		if err == nil {
+			t.Error("expected error when category is missing")
+		}
+		if !strings.Contains(output, "--category is required") {
+			t.Errorf("expected category error, got: %s", output)
+		}
+	})
+
+	t.Run("invalid profile category", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "profile",
+			"--category", "invalid-category",
+			"--data", `{"name":"John"}`)
+		if err == nil {
+			t.Error("expected error for invalid category")
+		}
+		if !strings.Contains(output, "invalid profile category") {
+			t.Errorf("expected category error, got: %s", output)
+		}
+	})
+
+	t.Run("missing data for profile", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "profile",
+			"--category", "contact")
+		if err == nil {
+			t.Error("expected error when data is missing")
+		}
+		if !strings.Contains(output, "--data is required") {
+			t.Errorf("expected data error, got: %s", output)
+		}
+	})
+
+	t.Run("missing content for context", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "context",
+			"--category", "achievement")
+		if err == nil {
+			t.Error("expected error when content is missing")
+		}
+		if !strings.Contains(output, "--content is required") {
+			t.Errorf("expected content error, got: %s", output)
+		}
+	})
+
+	t.Run("invalid JSON data", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "profile",
+			"--category", "contact",
+			"--data", `{invalid json}`)
+		if err == nil {
+			t.Error("expected error for invalid JSON")
+		}
+		if !strings.Contains(output, "invalid JSON") {
+			t.Errorf("expected JSON error, got: %s", output)
+		}
+	})
+
+	t.Run("contact missing required field", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "add",
+			"--type", "profile",
+			"--category", "contact",
+			"--data", `{"name":"John"}`) // missing email
+		if err == nil {
+			t.Error("expected error for missing email")
+		}
+		if !strings.Contains(output, "email is required") {
+			t.Errorf("expected email required error, got: %s", output)
+		}
+	})
+}
+
+func TestKBShow(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	kbPath := filepath.Join(workDir, "candidate-kb.jsonl")
+	os.WriteFile(kbPath, []byte{}, 0644)
+
+	// Add some entries
+	runApp(t, workDir, "kb", "add", "--type", "profile", "--category", "contact",
+		"--data", `{"name":"John","email":"j@e.com"}`)
+	runApp(t, workDir, "kb", "add", "--type", "profile", "--category", "experience",
+		"--data", `{"company":"Acme","role":"Dev","start_date":"2020-01"}`)
+	runApp(t, workDir, "kb", "add", "--type", "context", "--category", "achievement",
+		"--content", "Built something great")
+
+	t.Run("show all", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "show")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Profile Entries") {
+			t.Errorf("expected profile section, got: %s", output)
+		}
+		if !strings.Contains(output, "Context Entries") {
+			t.Errorf("expected context section, got: %s", output)
+		}
+		if !strings.Contains(output, "John") {
+			t.Errorf("expected contact name, got: %s", output)
+		}
+	})
+
+	t.Run("show profile only", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "show", "profile")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Profile Entries") {
+			t.Errorf("expected profile section, got: %s", output)
+		}
+		if strings.Contains(output, "Context Entries") {
+			t.Errorf("should not contain context section, got: %s", output)
+		}
+	})
+
+	t.Run("show context only", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "show", "context")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if strings.Contains(output, "Profile Entries") {
+			t.Errorf("should not contain profile section, got: %s", output)
+		}
+		if !strings.Contains(output, "Context Entries") {
+			t.Errorf("expected context section, got: %s", output)
+		}
+	})
+}
+
+func TestKBUpdate(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	kbPath := filepath.Join(workDir, "candidate-kb.jsonl")
+	os.WriteFile(kbPath, []byte{}, 0644)
+
+	// Add an entry to update
+	addOutput, _ := runApp(t, workDir, "kb", "add",
+		"--type", "context",
+		"--category", "achievement",
+		"--content", "Original content")
+	kbID := extractKBID(addOutput)
+
+	t.Run("update content", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "update", kbID,
+			"--content", "Updated content")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Entry updated successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+	})
+
+	t.Run("update non-existent", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "update", "kb-nonexistent",
+			"--content", "test")
+		if err == nil {
+			t.Error("expected error for non-existent entry")
+		}
+		if !strings.Contains(output, "Entry not found") {
+			t.Errorf("expected not found error, got: %s", output)
+		}
+	})
+}
+
+func TestKBRemove(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	kbPath := filepath.Join(workDir, "candidate-kb.jsonl")
+	os.WriteFile(kbPath, []byte{}, 0644)
+
+	// Add an entry to remove
+	addOutput, _ := runApp(t, workDir, "kb", "add",
+		"--type", "context",
+		"--category", "test",
+		"--content", "To be removed")
+	kbID := extractKBID(addOutput)
+
+	t.Run("remove with confirmation", func(t *testing.T) {
+		// Use stdin to provide "y" confirmation
+		cmd := exec.Command(binaryPath, "kb", "remove", kbID)
+		cmd.Dir = workDir
+		cmd.Stdin = strings.NewReader("y\n")
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, string(output))
+		}
+		if !strings.Contains(string(output), "Entry removed") {
+			t.Errorf("expected removed message, got: %s", string(output))
+		}
+	})
+
+	t.Run("remove non-existent", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "remove", "kb-nonexistent")
+		if err == nil {
+			t.Error("expected error for non-existent entry")
+		}
+		if !strings.Contains(output, "Entry not found") {
+			t.Errorf("expected not found error, got: %s", output)
+		}
+	})
 }

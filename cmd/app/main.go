@@ -134,6 +134,8 @@ func main() {
 
 	store := storage.New("")
 
+	kbStore := storage.NewKBStorage("")
+
 	switch os.Args[1] {
 	case "init":
 		cmdInit()
@@ -159,6 +161,12 @@ func main() {
 			os.Exit(1)
 		}
 		cmdShow(store, os.Args[2])
+	case "kb":
+		if len(os.Args) < 3 {
+			printKBUsage()
+			os.Exit(1)
+		}
+		cmdKB(kbStore, os.Args[2], os.Args[3:])
 	case "help":
 		printUsage()
 	default:
@@ -175,12 +183,13 @@ Usage:
   app <command> [arguments]
 
 Commands:
-  init             Initialize application tracker (create applications.jsonl)
+  init             Initialize tracker (creates applications.jsonl and candidate-kb.jsonl)
   add              Add a new application
   list             List all applications
   show <id>        Show details of an application
   update <id>      Update an application
   remove <id>      Remove an application
+  kb <subcommand>  Manage candidate knowledge base (run 'app kb' for details)
   help             Show this help message
 
 Flags for add command (optional - without flags, runs interactively):
@@ -210,30 +219,61 @@ Examples:
   app update app-a1b2c3d4                            # Interactive mode
   app update app-a1b2c3d4 --status "interviewing"    # Flag mode (quick)
   app update app-a1b2c3d4 --status "offer" --notes "Accepted!"
-  app remove app-a1b2c3d4`)
+  app remove app-a1b2c3d4
+  app kb show                                        # Show knowledge base
+  app kb add --type profile --category contact --data '{"name":"John"}'`)
 }
 
 func cmdInit() {
-	filePath := storage.DefaultFilePath
+	appFilePath := storage.DefaultFilePath
+	kbFilePath := storage.DefaultKBFilePath
 
-	// Check if file already exists
-	if _, err := os.Stat(filePath); err == nil {
-		fmt.Printf("Application tracker already initialized (%s exists)\n", filePath)
+	appExists := false
+	kbExists := false
+
+	// Check if application file already exists
+	if _, err := os.Stat(appFilePath); err == nil {
+		appExists = true
+	}
+
+	// Check if KB file already exists
+	if _, err := os.Stat(kbFilePath); err == nil {
+		kbExists = true
+	}
+
+	if appExists && kbExists {
+		fmt.Printf("Already initialized (%s and %s exist)\n", appFilePath, kbFilePath)
 		return
 	}
 
-	// Create empty file
-	file, err := os.Create(filePath)
-	if err != nil {
-		fmt.Printf("Error creating %s: %v\n", filePath, err)
-		os.Exit(1)
+	// Create applications.jsonl if needed
+	if !appExists {
+		file, err := os.Create(appFilePath)
+		if err != nil {
+			fmt.Printf("Error creating %s: %v\n", appFilePath, err)
+			os.Exit(1)
+		}
+		file.Close()
+		fmt.Printf("Created: %s\n", appFilePath)
 	}
-	file.Close()
 
-	fmt.Printf("Initialized application tracker: %s\n", filePath)
+	// Create candidate-kb.jsonl if needed
+	if !kbExists {
+		file, err := os.Create(kbFilePath)
+		if err != nil {
+			fmt.Printf("Error creating %s: %v\n", kbFilePath, err)
+			os.Exit(1)
+		}
+		file.Close()
+		fmt.Printf("Created: %s\n", kbFilePath)
+	}
+
+	fmt.Println("\nInitialized application tracker!")
 	fmt.Println("\nNext steps:")
-	fmt.Println("  app add     - Add your first application")
-	fmt.Println("  app list    - View all applications")
+	fmt.Println("  app add       - Add your first application")
+	fmt.Println("  app kb add    - Add candidate profile info")
+	fmt.Println("  app list      - View all applications")
+	fmt.Println("  app kb show   - View candidate knowledge base")
 }
 
 func cmdAdd(store *storage.Storage, args []string) {

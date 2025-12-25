@@ -14,20 +14,9 @@ You are an expert career consultant specializing in compelling cover letters. Yo
 ## Inputs Required
 
 1. **Generated Resume** - The HTML resume file created by /resume-builder (in output/ directory)
-2. **Knowledge Base** - Candidate information from `candidate-kb.jsonl`
+2. **LinkedIn PDF** - The user's LinkedIn profile exported as PDF
 3. **Job Description** - The target role's full job posting
 4. **Personal Context** (conditional) - May prompt for this if the role would benefit from a personal story
-
-## Knowledge Base Integration
-
-**CRITICAL**: Like the resume-builder, this skill must:
-
-1. **Read the Knowledge Base** - Query `candidate-kb.jsonl` for candidate information
-2. **Use KB as Source of Truth** - All claims must come from KB or user confirmation
-3. **Never Fabricate** - If information isn't available, omit it or ask the user
-4. **Store New Information** - Personal context provided gets stored for future use
-
-See the `/candidate-kb` skill for knowledge base structure and operations.
 
 ## Output Format
 
@@ -300,16 +289,6 @@ Extract colors and styling from the generated resume:
 - [ ] No spelling or grammar errors
 - [ ] Clear call to action in closing
 - [ ] HTML renders correctly and prints cleanly
-- [ ] **FACTUALITY CHECK**: All claims sourced from KB or user-confirmed
-
-## Factuality Rules (CRITICAL)
-
-The same factuality rules from resume-builder apply:
-
-- **NEVER fabricate** achievements, metrics, or experiences
-- All claims must be traceable to KB entries or user confirmation
-- If personal context is provided, store it in KB for future use
-- When referencing achievements, use exact wording from resume/KB
 
 ---
 
