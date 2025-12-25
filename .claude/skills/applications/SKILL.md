@@ -149,19 +149,35 @@ There's also a CLI tool at `./bin/app` for quick operations:
 | `--company` | Yes (with flags) | Company name |
 | `--role` | Yes (with flags) | Job title |
 | `--jd-url` | No | Job description URL |
+| `--jd-content` | No | Job description text (inline) |
+| `--jd-file` | No | Path to file containing job description |
 | `--company-url` | No | Company website |
 | `--resume-path` | No | Path to resume file |
 | `--notes` | No | Notes about application |
 
 When using flags, `--company` and `--role` are required. Without any flags, the command runs in interactive mode.
 
-### Fetching JD Content
+**Note:** `--jd-content` and `--jd-file` cannot be used together. Use `--jd-content` for short inline text, or `--jd-file` to read from a file (ideal for longer JDs).
 
-The CLI stores the JD URL but does not fetch content automatically. To populate the `jd_content` field with clean extracted text, use the `/applications` skill:
+### Adding JD Content
 
-> "Fetch and store the JD content for the [company] application"
+There are three ways to add job description content:
 
-This leverages Claude's ability to intelligently extract relevant content from job posting pages.
+1. **From file** (recommended for long JDs):
+   ```bash
+   ./bin/app add --company "Acme" --role "Engineer" --jd-file ./jd.txt
+   ```
+
+2. **Inline** (for short descriptions):
+   ```bash
+   ./bin/app add --company "Acme" --role "Engineer" --jd-content "Looking for..."
+   ```
+
+3. **Via Claude skill** (for fetching from URL):
+   If you only have a URL and want clean extracted content, use the `/applications` skill:
+   > "Fetch and store the JD content for the [company] application"
+   
+   This leverages Claude's ability to intelligently extract relevant content from job posting pages, filtering out navigation, ads, and other noise.
 
 ## Implementation Notes
 

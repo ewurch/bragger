@@ -74,6 +74,8 @@ Add command flags (optional - without flags, runs interactively):
   --company        Company name (required with flags)
   --role           Job title (required with flags)
   --jd-url         Job description URL
+  --jd-content     Job description text (inline)
+  --jd-file        Path to file containing job description
   --company-url    Company website
   --resume-path    Path to resume file
   --notes          Notes about application
@@ -83,6 +85,7 @@ Examples:
   app add                                            # Interactive mode
   app add --company "Acme" --role "Engineer"         # Flag mode (quick)
   app add --company "Acme" --role "Engineer" --jd-url "https://..."
+  app add --company "Acme" --role "Engineer" --jd-file ./jd.txt
   app list
   app show app-a1b2c3d4
   app update app-a1b2c3d4
@@ -118,6 +121,8 @@ func cmdAdd(store *storage.Storage, args []string) {
 	companyFlag := fs.String("company", "", "Company name")
 	roleFlag := fs.String("role", "", "Job title")
 	jdURLFlag := fs.String("jd-url", "", "Job description URL")
+	jdContentFlag := fs.String("jd-content", "", "Job description text (inline)")
+	jdFileFlag := fs.String("jd-file", "", "Path to file containing job description")
 	companyURLFlag := fs.String("company-url", "", "Company website")
 	resumePathFlag := fs.String("resume-path", "", "Path to resume file")
 	notesFlag := fs.String("notes", "", "Notes about application")
@@ -126,6 +131,7 @@ func cmdAdd(store *storage.Storage, args []string) {
 
 	// Check if any flag is provided (flag mode vs interactive mode)
 	flagMode := *companyFlag != "" || *roleFlag != "" || *jdURLFlag != "" ||
+		*jdContentFlag != "" || *jdFileFlag != "" ||
 		*companyURLFlag != "" || *resumePathFlag != "" || *notesFlag != ""
 
 	var app *models.Application
@@ -137,11 +143,29 @@ func cmdAdd(store *storage.Storage, args []string) {
 			os.Exit(1)
 		}
 
+		// Validate JD content flags are not both provided
+		if *jdContentFlag != "" && *jdFileFlag != "" {
+			fmt.Println("Error: --jd-content and --jd-file cannot be used together")
+			os.Exit(1)
+		}
+
 		app = models.NewApplication(*companyFlag, *roleFlag)
 		app.JDURL = *jdURLFlag
 		app.CompanyURL = *companyURLFlag
 		app.ResumePath = *resumePathFlag
 		app.Notes = *notesFlag
+
+		// Handle JD content
+		if *jdFileFlag != "" {
+			content, err := os.ReadFile(*jdFileFlag)
+			if err != nil {
+				fmt.Printf("Error reading JD file: %v\n", err)
+				os.Exit(1)
+			}
+			app.JDContent = strings.TrimSpace(string(content))
+		} else if *jdContentFlag != "" {
+			app.JDContent = *jdContentFlag
+		}
 	} else {
 		// Interactive mode (original behavior)
 		reader := bufio.NewReader(os.Stdin)
