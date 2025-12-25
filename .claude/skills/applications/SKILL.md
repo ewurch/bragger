@@ -139,10 +139,11 @@ There's also a CLI tool at `./bin/app` for quick operations:
 ./bin/app list             # List all
 ./bin/app show <id>        # Show details
 ./bin/app update <id>      # Interactive update
+./bin/app update <id> --status "interviewing"  # Flag mode (quick)
 ./bin/app remove <id>      # Remove with confirmation
 ```
 
-### Available flags for `add`:
+### Available flags for `add` and `update`:
 
 | Flag | Required | Description |
 |------|----------|-------------|
@@ -157,9 +158,26 @@ There's also a CLI tool at `./bin/app` for quick operations:
 | `--resume-path` | No | Path to resume file |
 | `--notes` | No | Notes about application |
 
-When using flags, `--company` and `--role` are required. Without any flags, the command runs in interactive mode.
+**For `add`:** `--company` and `--role` are required when using flags. Without any flags, runs interactively.
 
-**Note:** `--jd-content` and `--jd-file` cannot be used together. Use `--jd-content` for short inline text, or `--jd-file` to read from a file (ideal for longer JDs).
+**For `update`:** All flags are optional. Only provided flags will be updated. Without flags, runs interactively.
+
+**Note:** `--jd-content` and `--jd-file` cannot be used together.
+
+### Updating Applications
+
+Update any field using flags:
+
+```bash
+# Update status
+./bin/app update app-xxx --status "interviewing"
+
+# Update multiple fields
+./bin/app update app-xxx --status "offer" --notes "Accepted the offer!"
+
+# Add JD content later
+./bin/app update app-xxx --jd-file ./jd.txt
+```
 
 ### Backfilling Old Applications
 

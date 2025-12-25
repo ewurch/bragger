@@ -308,6 +308,184 @@ func TestCLIList(t *testing.T) {
 	})
 }
 
+// Helper to extract app ID from add command output
+func extractAppID(output string) string {
+	lines := strings.Split(output, "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "ID:") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "ID:"))
+		}
+	}
+	return ""
+}
+
+func TestCLIUpdateWithFlags(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	// Create an application to update
+	addOutput, _ := runApp(t, workDir, "add", "--company", "UpdateCorp", "--role", "Engineer")
+	appID := extractAppID(addOutput)
+	if appID == "" {
+		t.Fatal("could not extract app ID")
+	}
+
+	t.Run("update status only", func(t *testing.T) {
+		output, err := runApp(t, workDir, "update", appID, "--status", "interviewing")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Application updated successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+		if !strings.Contains(output, "interviewing") {
+			t.Errorf("expected new status in output, got: %s", output)
+		}
+
+		// Verify with show
+		showOutput, _ := runApp(t, workDir, "show", appID)
+		if !strings.Contains(showOutput, "interviewing") {
+			t.Errorf("status not persisted, got: %s", showOutput)
+		}
+	})
+
+	t.Run("update notes only", func(t *testing.T) {
+		output, err := runApp(t, workDir, "update", appID, "--notes", "Had first interview")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Application updated successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+
+		// Verify with show
+		showOutput, _ := runApp(t, workDir, "show", appID)
+		if !strings.Contains(showOutput, "Had first interview") {
+			t.Errorf("notes not persisted, got: %s", showOutput)
+		}
+	})
+
+	t.Run("update multiple fields", func(t *testing.T) {
+		output, err := runApp(t, workDir, "update", appID,
+			"--status", "offer",
+			"--notes", "Got the offer!",
+			"--jd-url", "https://example.com/job")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "offer") {
+			t.Errorf("expected new status in output, got: %s", output)
+		}
+
+		// Verify with show
+		showOutput, _ := runApp(t, workDir, "show", appID)
+		if !strings.Contains(showOutput, "offer") {
+			t.Errorf("status not persisted, got: %s", showOutput)
+		}
+		if !strings.Contains(showOutput, "Got the offer!") {
+			t.Errorf("notes not persisted, got: %s", showOutput)
+		}
+		if !strings.Contains(showOutput, "https://example.com/job") {
+			t.Errorf("jd-url not persisted, got: %s", showOutput)
+		}
+	})
+
+	t.Run("update with jd-file", func(t *testing.T) {
+		jdPath := filepath.Join(workDir, "updated-jd.txt")
+		os.WriteFile(jdPath, []byte("Updated job description content"), 0644)
+
+		output, err := runApp(t, workDir, "update", appID, "--jd-file", jdPath)
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+
+		// Verify with show
+		showOutput, _ := runApp(t, workDir, "show", appID)
+		if !strings.Contains(showOutput, "Updated job description content") {
+			t.Errorf("jd content not persisted, got: %s", showOutput)
+		}
+	})
+
+	t.Run("update company and role", func(t *testing.T) {
+		output, err := runApp(t, workDir, "update", appID,
+			"--company", "NewCompany",
+			"--role", "Senior Engineer")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "NewCompany") {
+			t.Errorf("expected new company in output, got: %s", output)
+		}
+		if !strings.Contains(output, "Senior Engineer") {
+			t.Errorf("expected new role in output, got: %s", output)
+		}
+	})
+
+	t.Run("update date", func(t *testing.T) {
+		output, err := runApp(t, workDir, "update", appID, "--date", "2025-01-01")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "2025-01-01") {
+			t.Errorf("expected new date in output, got: %s", output)
+		}
+	})
+}
+
+func TestCLIUpdateErrors(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	// Create an application
+	addOutput, _ := runApp(t, workDir, "add", "--company", "ErrorCorp", "--role", "Dev")
+	appID := extractAppID(addOutput)
+
+	t.Run("update non-existent app", func(t *testing.T) {
+		output, err := runApp(t, workDir, "update", "app-nonexistent", "--status", "offer")
+		if err == nil {
+			t.Error("expected error for non-existent app")
+		}
+		if !strings.Contains(output, "Application not found") {
+			t.Errorf("expected not found message, got: %s", output)
+		}
+	})
+
+	t.Run("update with invalid status", func(t *testing.T) {
+		output, err := runApp(t, workDir, "update", appID, "--status", "invalid")
+		if err == nil {
+			t.Error("expected error for invalid status")
+		}
+		if !strings.Contains(output, "--status must be one of") {
+			t.Errorf("expected status error, got: %s", output)
+		}
+	})
+
+	t.Run("update with invalid date", func(t *testing.T) {
+		output, err := runApp(t, workDir, "update", appID, "--date", "not-a-date")
+		if err == nil {
+			t.Error("expected error for invalid date")
+		}
+		if !strings.Contains(output, "--date must be in YYYY-MM-DD format") {
+			t.Errorf("expected date error, got: %s", output)
+		}
+	})
+
+	t.Run("update with both jd-content and jd-file", func(t *testing.T) {
+		jdPath := filepath.Join(workDir, "jd.txt")
+		os.WriteFile(jdPath, []byte("test"), 0644)
+
+		output, err := runApp(t, workDir, "update", appID,
+			"--jd-content", "inline",
+			"--jd-file", jdPath)
+		if err == nil {
+			t.Error("expected error for conflicting jd flags")
+		}
+		if !strings.Contains(output, "--jd-content and --jd-file cannot be used together") {
+			t.Errorf("expected conflict error, got: %s", output)
+		}
+	})
+}
+
 func TestCLIShowAndVerifyJDContent(t *testing.T) {
 	workDir, cleanup := setupIntegrationTest(t)
 	defer cleanup()
@@ -322,16 +500,7 @@ func TestCLIShowAndVerifyJDContent(t *testing.T) {
 		"--role", "Senior Engineer",
 		"--jd-file", jdPath)
 
-	// Extract ID from output
-	lines := strings.Split(output, "\n")
-	var appID string
-	for _, line := range lines {
-		if strings.HasPrefix(line, "ID:") {
-			appID = strings.TrimSpace(strings.TrimPrefix(line, "ID:"))
-			break
-		}
-	}
-
+	appID := extractAppID(output)
 	if appID == "" {
 		t.Fatal("could not extract app ID from output")
 	}
@@ -380,5 +549,10 @@ func TestCLIHelp(t *testing.T) {
 		if !strings.Contains(output, flag) {
 			t.Errorf("expected help to contain %q, got: %s", flag, output)
 		}
+	}
+
+	// Check that update command examples are documented
+	if !strings.Contains(output, "update app-a1b2c3d4 --status") {
+		t.Errorf("expected update flag example in help, got: %s", output)
 	}
 }

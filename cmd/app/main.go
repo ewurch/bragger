@@ -13,6 +13,119 @@ import (
 	"github.com/ewurch/resume-tracker/internal/storage"
 )
 
+// appFlags holds all the optional flags for add/update commands
+type appFlags struct {
+	company    string
+	role       string
+	status     string
+	date       string
+	jdURL      string
+	jdContent  string
+	jdFile     string
+	companyURL string
+	resumePath string
+	notes      string
+}
+
+// registerAppFlags registers all application flags on a FlagSet
+func registerAppFlags(fs *flag.FlagSet) *appFlags {
+	f := &appFlags{}
+	fs.StringVar(&f.company, "company", "", "Company name")
+	fs.StringVar(&f.role, "role", "", "Job title")
+	fs.StringVar(&f.status, "status", "", "Application status (applied/interviewing/rejected/offer)")
+	fs.StringVar(&f.date, "date", "", "Date applied (YYYY-MM-DD format)")
+	fs.StringVar(&f.jdURL, "jd-url", "", "Job description URL")
+	fs.StringVar(&f.jdContent, "jd-content", "", "Job description text (inline)")
+	fs.StringVar(&f.jdFile, "jd-file", "", "Path to file containing job description")
+	fs.StringVar(&f.companyURL, "company-url", "", "Company website")
+	fs.StringVar(&f.resumePath, "resume-path", "", "Path to resume file")
+	fs.StringVar(&f.notes, "notes", "", "Notes about application")
+	return f
+}
+
+// hasAnyFlag returns true if any flag was provided
+func (f *appFlags) hasAnyFlag() bool {
+	return f.company != "" || f.role != "" || f.status != "" || f.date != "" ||
+		f.jdURL != "" || f.jdContent != "" || f.jdFile != "" ||
+		f.companyURL != "" || f.resumePath != "" || f.notes != ""
+}
+
+// validate checks flag values and returns an error message if invalid
+func (f *appFlags) validate() string {
+	// Validate JD content flags are not both provided
+	if f.jdContent != "" && f.jdFile != "" {
+		return "Error: --jd-content and --jd-file cannot be used together"
+	}
+
+	// Validate status if provided
+	if f.status != "" {
+		status := models.Status(f.status)
+		if !status.IsValid() {
+			return "Error: --status must be one of: applied, interviewing, rejected, offer"
+		}
+	}
+
+	// Validate date format if provided
+	if f.date != "" {
+		if _, err := time.Parse("2006-01-02", f.date); err != nil {
+			return "Error: --date must be in YYYY-MM-DD format"
+		}
+	}
+
+	return ""
+}
+
+// loadJDContent reads JD content from file if jdFile is set
+func (f *appFlags) loadJDContent() (string, error) {
+	if f.jdFile != "" {
+		content, err := os.ReadFile(f.jdFile)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(string(content)), nil
+	}
+	return f.jdContent, nil
+}
+
+// applyToApplication applies non-empty flag values to an application
+func (f *appFlags) applyToApplication(app *models.Application) error {
+	if f.company != "" {
+		app.Company = f.company
+	}
+	if f.role != "" {
+		app.Role = f.role
+	}
+	if f.status != "" {
+		app.Status = models.Status(f.status)
+	}
+	if f.date != "" {
+		app.DateApplied = f.date
+	}
+	if f.jdURL != "" {
+		app.JDURL = f.jdURL
+	}
+	if f.companyURL != "" {
+		app.CompanyURL = f.companyURL
+	}
+	if f.resumePath != "" {
+		app.ResumePath = f.resumePath
+	}
+	if f.notes != "" {
+		app.Notes = f.notes
+	}
+
+	// Handle JD content (from file or inline)
+	jdContent, err := f.loadJDContent()
+	if err != nil {
+		return fmt.Errorf("Error reading JD file: %v", err)
+	}
+	if jdContent != "" {
+		app.JDContent = jdContent
+	}
+
+	return nil
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()
@@ -30,10 +143,10 @@ func main() {
 		cmdList(store)
 	case "update":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: app update <id>")
+			fmt.Println("Usage: app update <id> [flags]")
 			os.Exit(1)
 		}
-		cmdUpdate(store, os.Args[2])
+		cmdUpdate(store, os.Args[2], os.Args[3:])
 	case "remove":
 		if len(os.Args) < 3 {
 			fmt.Println("Usage: app remove <id>")
@@ -66,11 +179,11 @@ Commands:
   add              Add a new application
   list             List all applications
   show <id>        Show details of an application
-  update <id>      Update an application (interactive)
+  update <id>      Update an application
   remove <id>      Remove an application
   help             Show this help message
 
-Add command flags (optional - without flags, runs interactively):
+Flags for add command (optional - without flags, runs interactively):
   --company        Company name (required with flags)
   --role           Job title (required with flags)
   --status         Status: applied, interviewing, rejected, offer (default: applied)
@@ -82,6 +195,9 @@ Add command flags (optional - without flags, runs interactively):
   --resume-path    Path to resume file
   --notes          Notes about application
 
+Flags for update command (optional - without flags, runs interactively):
+  All flags from add command are supported. Only provided flags will be updated.
+
 Examples:
   app init
   app add                                            # Interactive mode
@@ -91,7 +207,9 @@ Examples:
   app add --company "Old" --role "Dev" --date "2025-01-15" --status "interviewing"
   app list
   app show app-a1b2c3d4
-  app update app-a1b2c3d4
+  app update app-a1b2c3d4                            # Interactive mode
+  app update app-a1b2c3d4 --status "interviewing"    # Flag mode (quick)
+  app update app-a1b2c3d4 --status "offer" --notes "Accepted!"
   app remove app-a1b2c3d4`)
 }
 
@@ -119,84 +237,29 @@ func cmdInit() {
 }
 
 func cmdAdd(store *storage.Storage, args []string) {
-	// Define flags
 	fs := flag.NewFlagSet("add", flag.ExitOnError)
-	companyFlag := fs.String("company", "", "Company name")
-	roleFlag := fs.String("role", "", "Job title")
-	statusFlag := fs.String("status", "", "Application status (applied/interviewing/rejected/offer)")
-	dateFlag := fs.String("date", "", "Date applied (YYYY-MM-DD format)")
-	jdURLFlag := fs.String("jd-url", "", "Job description URL")
-	jdContentFlag := fs.String("jd-content", "", "Job description text (inline)")
-	jdFileFlag := fs.String("jd-file", "", "Path to file containing job description")
-	companyURLFlag := fs.String("company-url", "", "Company website")
-	resumePathFlag := fs.String("resume-path", "", "Path to resume file")
-	notesFlag := fs.String("notes", "", "Notes about application")
-
+	flags := registerAppFlags(fs)
 	fs.Parse(args)
-
-	// Check if any flag is provided (flag mode vs interactive mode)
-	flagMode := *companyFlag != "" || *roleFlag != "" || *statusFlag != "" || *dateFlag != "" ||
-		*jdURLFlag != "" || *jdContentFlag != "" || *jdFileFlag != "" ||
-		*companyURLFlag != "" || *resumePathFlag != "" || *notesFlag != ""
 
 	var app *models.Application
 
-	if flagMode {
+	if flags.hasAnyFlag() {
 		// Flag mode: validate required fields
-		if *companyFlag == "" || *roleFlag == "" {
+		if flags.company == "" || flags.role == "" {
 			fmt.Println("Error: --company and --role are required when using flags")
 			os.Exit(1)
 		}
 
-		// Validate JD content flags are not both provided
-		if *jdContentFlag != "" && *jdFileFlag != "" {
-			fmt.Println("Error: --jd-content and --jd-file cannot be used together")
+		// Validate flags
+		if errMsg := flags.validate(); errMsg != "" {
+			fmt.Println(errMsg)
 			os.Exit(1)
 		}
 
-		// Validate status if provided
-		if *statusFlag != "" {
-			status := models.Status(*statusFlag)
-			if !status.IsValid() {
-				fmt.Println("Error: --status must be one of: applied, interviewing, rejected, offer")
-				os.Exit(1)
-			}
-		}
-
-		// Validate date format if provided
-		if *dateFlag != "" {
-			if _, err := time.Parse("2006-01-02", *dateFlag); err != nil {
-				fmt.Println("Error: --date must be in YYYY-MM-DD format")
-				os.Exit(1)
-			}
-		}
-
-		app = models.NewApplication(*companyFlag, *roleFlag)
-		app.JDURL = *jdURLFlag
-		app.CompanyURL = *companyURLFlag
-		app.ResumePath = *resumePathFlag
-		app.Notes = *notesFlag
-
-		// Override status if provided
-		if *statusFlag != "" {
-			app.Status = models.Status(*statusFlag)
-		}
-
-		// Override date if provided
-		if *dateFlag != "" {
-			app.DateApplied = *dateFlag
-		}
-
-		// Handle JD content
-		if *jdFileFlag != "" {
-			content, err := os.ReadFile(*jdFileFlag)
-			if err != nil {
-				fmt.Printf("Error reading JD file: %v\n", err)
-				os.Exit(1)
-			}
-			app.JDContent = strings.TrimSpace(string(content))
-		} else if *jdContentFlag != "" {
-			app.JDContent = *jdContentFlag
+		app = models.NewApplication(flags.company, flags.role)
+		if err := flags.applyToApplication(app); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	} else {
 		// Interactive mode (original behavior)
@@ -325,55 +388,97 @@ func cmdShow(store *storage.Storage, id string) {
 	}
 }
 
-func cmdUpdate(store *storage.Storage, id string) {
+func cmdUpdate(store *storage.Storage, id string, args []string) {
 	app, err := store.Get(id)
 	if err != nil {
 		fmt.Printf("Application not found: %s\n", id)
 		os.Exit(1)
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	fs := flag.NewFlagSet("update", flag.ExitOnError)
+	flags := registerAppFlags(fs)
+	fs.Parse(args)
 
-	fmt.Printf("Current status: %s\n", app.Status)
-	fmt.Print("New status (applied/interviewing/rejected/offer) [enter to skip]: ")
-	status, _ := reader.ReadString('\n')
-	status = strings.TrimSpace(status)
-
-	if status != "" {
-		newStatus := models.Status(status)
-		if !newStatus.IsValid() {
-			fmt.Println("Invalid status. Must be: applied, interviewing, rejected, or offer")
+	if flags.hasAnyFlag() {
+		// Flag mode: validate and apply
+		if errMsg := flags.validate(); errMsg != "" {
+			fmt.Println(errMsg)
 			os.Exit(1)
 		}
 
+		if err := flags.applyToApplication(app); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		// Save the updated application
 		err = store.Update(id, func(a *models.Application) {
-			a.Status = newStatus
+			a.Company = app.Company
+			a.Role = app.Role
+			a.Status = app.Status
+			a.DateApplied = app.DateApplied
+			a.JDURL = app.JDURL
+			a.JDContent = app.JDContent
+			a.CompanyURL = app.CompanyURL
+			a.ResumePath = app.ResumePath
+			a.Notes = app.Notes
 		})
 		if err != nil {
 			fmt.Printf("Error updating application: %v\n", err)
 			os.Exit(1)
 		}
 
-		fmt.Printf("Status updated to: %s\n", newStatus)
-	}
+		fmt.Println("Application updated successfully!")
+		fmt.Printf("ID: %s\n", app.ID)
+		fmt.Printf("Company: %s\n", app.Company)
+		fmt.Printf("Role: %s\n", app.Role)
+		fmt.Printf("Status: %s\n", app.Status)
+		fmt.Printf("Date Applied: %s\n", app.DateApplied)
+	} else {
+		// Interactive mode
+		reader := bufio.NewReader(os.Stdin)
 
-	fmt.Printf("Current notes: %s\n", app.Notes)
-	fmt.Print("New notes [enter to skip]: ")
-	notes, _ := reader.ReadString('\n')
-	notes = strings.TrimSpace(notes)
+		fmt.Printf("Current status: %s\n", app.Status)
+		fmt.Print("New status (applied/interviewing/rejected/offer) [enter to skip]: ")
+		status, _ := reader.ReadString('\n')
+		status = strings.TrimSpace(status)
 
-	if notes != "" {
-		err = store.Update(id, func(a *models.Application) {
-			a.Notes = notes
-		})
-		if err != nil {
-			fmt.Printf("Error updating notes: %v\n", err)
-			os.Exit(1)
+		if status != "" {
+			newStatus := models.Status(status)
+			if !newStatus.IsValid() {
+				fmt.Println("Invalid status. Must be: applied, interviewing, rejected, or offer")
+				os.Exit(1)
+			}
+
+			err = store.Update(id, func(a *models.Application) {
+				a.Status = newStatus
+			})
+			if err != nil {
+				fmt.Printf("Error updating application: %v\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Printf("Status updated to: %s\n", newStatus)
 		}
-		fmt.Println("Notes updated.")
-	}
 
-	fmt.Println("Update complete.")
+		fmt.Printf("Current notes: %s\n", app.Notes)
+		fmt.Print("New notes [enter to skip]: ")
+		notes, _ := reader.ReadString('\n')
+		notes = strings.TrimSpace(notes)
+
+		if notes != "" {
+			err = store.Update(id, func(a *models.Application) {
+				a.Notes = notes
+			})
+			if err != nil {
+				fmt.Printf("Error updating notes: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Println("Notes updated.")
+		}
+
+		fmt.Println("Update complete.")
+	}
 }
 
 func cmdRemove(store *storage.Storage, id string) {
