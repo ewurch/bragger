@@ -73,6 +73,8 @@ Commands:
 Add command flags (optional - without flags, runs interactively):
   --company        Company name (required with flags)
   --role           Job title (required with flags)
+  --status         Status: applied, interviewing, rejected, offer (default: applied)
+  --date           Date applied in YYYY-MM-DD format (default: today)
   --jd-url         Job description URL
   --jd-content     Job description text (inline)
   --jd-file        Path to file containing job description
@@ -86,6 +88,7 @@ Examples:
   app add --company "Acme" --role "Engineer"         # Flag mode (quick)
   app add --company "Acme" --role "Engineer" --jd-url "https://..."
   app add --company "Acme" --role "Engineer" --jd-file ./jd.txt
+  app add --company "Old" --role "Dev" --date "2025-01-15" --status "interviewing"
   app list
   app show app-a1b2c3d4
   app update app-a1b2c3d4
@@ -120,6 +123,8 @@ func cmdAdd(store *storage.Storage, args []string) {
 	fs := flag.NewFlagSet("add", flag.ExitOnError)
 	companyFlag := fs.String("company", "", "Company name")
 	roleFlag := fs.String("role", "", "Job title")
+	statusFlag := fs.String("status", "", "Application status (applied/interviewing/rejected/offer)")
+	dateFlag := fs.String("date", "", "Date applied (YYYY-MM-DD format)")
 	jdURLFlag := fs.String("jd-url", "", "Job description URL")
 	jdContentFlag := fs.String("jd-content", "", "Job description text (inline)")
 	jdFileFlag := fs.String("jd-file", "", "Path to file containing job description")
@@ -130,8 +135,8 @@ func cmdAdd(store *storage.Storage, args []string) {
 	fs.Parse(args)
 
 	// Check if any flag is provided (flag mode vs interactive mode)
-	flagMode := *companyFlag != "" || *roleFlag != "" || *jdURLFlag != "" ||
-		*jdContentFlag != "" || *jdFileFlag != "" ||
+	flagMode := *companyFlag != "" || *roleFlag != "" || *statusFlag != "" || *dateFlag != "" ||
+		*jdURLFlag != "" || *jdContentFlag != "" || *jdFileFlag != "" ||
 		*companyURLFlag != "" || *resumePathFlag != "" || *notesFlag != ""
 
 	var app *models.Application
@@ -149,11 +154,38 @@ func cmdAdd(store *storage.Storage, args []string) {
 			os.Exit(1)
 		}
 
+		// Validate status if provided
+		if *statusFlag != "" {
+			status := models.Status(*statusFlag)
+			if !status.IsValid() {
+				fmt.Println("Error: --status must be one of: applied, interviewing, rejected, offer")
+				os.Exit(1)
+			}
+		}
+
+		// Validate date format if provided
+		if *dateFlag != "" {
+			if _, err := time.Parse("2006-01-02", *dateFlag); err != nil {
+				fmt.Println("Error: --date must be in YYYY-MM-DD format")
+				os.Exit(1)
+			}
+		}
+
 		app = models.NewApplication(*companyFlag, *roleFlag)
 		app.JDURL = *jdURLFlag
 		app.CompanyURL = *companyURLFlag
 		app.ResumePath = *resumePathFlag
 		app.Notes = *notesFlag
+
+		// Override status if provided
+		if *statusFlag != "" {
+			app.Status = models.Status(*statusFlag)
+		}
+
+		// Override date if provided
+		if *dateFlag != "" {
+			app.DateApplied = *dateFlag
+		}
 
 		// Handle JD content
 		if *jdFileFlag != "" {

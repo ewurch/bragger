@@ -148,6 +148,8 @@ There's also a CLI tool at `./bin/app` for quick operations:
 |------|----------|-------------|
 | `--company` | Yes (with flags) | Company name |
 | `--role` | Yes (with flags) | Job title |
+| `--status` | No | Status: applied, interviewing, rejected, offer (default: applied) |
+| `--date` | No | Date applied in YYYY-MM-DD format (default: today) |
 | `--jd-url` | No | Job description URL |
 | `--jd-content` | No | Job description text (inline) |
 | `--jd-file` | No | Path to file containing job description |
@@ -158,6 +160,14 @@ There's also a CLI tool at `./bin/app` for quick operations:
 When using flags, `--company` and `--role` are required. Without any flags, the command runs in interactive mode.
 
 **Note:** `--jd-content` and `--jd-file` cannot be used together. Use `--jd-content` for short inline text, or `--jd-file` to read from a file (ideal for longer JDs).
+
+### Backfilling Old Applications
+
+Use `--status` and `--date` to add applications retroactively:
+
+```bash
+./bin/app add --company "OldCorp" --role "Engineer" --date "2025-01-15" --status "interviewing"
+```
 
 ### Adding JD Content
 

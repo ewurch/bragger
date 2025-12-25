@@ -132,6 +132,55 @@ func TestCLIAddWithFlags(t *testing.T) {
 			t.Fatalf("command failed: %v\nOutput: %s", err, output)
 		}
 	})
+
+	t.Run("with custom status", func(t *testing.T) {
+		output, err := runApp(t, workDir, "add",
+			"--company", "StatusCorp",
+			"--role", "Engineer",
+			"--status", "interviewing")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Application added successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+		if !strings.Contains(output, "interviewing") {
+			t.Errorf("expected status in output, got: %s", output)
+		}
+	})
+
+	t.Run("with custom date", func(t *testing.T) {
+		output, err := runApp(t, workDir, "add",
+			"--company", "DateCorp",
+			"--role", "Developer",
+			"--date", "2025-01-15")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "Application added successfully") {
+			t.Errorf("expected success message, got: %s", output)
+		}
+		if !strings.Contains(output, "2025-01-15") {
+			t.Errorf("expected date in output, got: %s", output)
+		}
+	})
+
+	t.Run("with status and date for backfill", func(t *testing.T) {
+		output, err := runApp(t, workDir, "add",
+			"--company", "OldCorp",
+			"--role", "Senior Dev",
+			"--status", "offer",
+			"--date", "2024-12-01")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "offer") {
+			t.Errorf("expected status in output, got: %s", output)
+		}
+		if !strings.Contains(output, "2024-12-01") {
+			t.Errorf("expected date in output, got: %s", output)
+		}
+	})
 }
 
 func TestCLIAddErrors(t *testing.T) {
@@ -185,6 +234,45 @@ func TestCLIAddErrors(t *testing.T) {
 		}
 		if !strings.Contains(output, "Error reading JD file") {
 			t.Errorf("expected file read error message, got: %s", output)
+		}
+	})
+
+	t.Run("invalid status", func(t *testing.T) {
+		output, err := runApp(t, workDir, "add",
+			"--company", "TestCorp",
+			"--role", "Engineer",
+			"--status", "invalid-status")
+		if err == nil {
+			t.Error("expected error for invalid status")
+		}
+		if !strings.Contains(output, "--status must be one of") {
+			t.Errorf("expected status error message, got: %s", output)
+		}
+	})
+
+	t.Run("invalid date format", func(t *testing.T) {
+		output, err := runApp(t, workDir, "add",
+			"--company", "TestCorp",
+			"--role", "Engineer",
+			"--date", "15-01-2025")
+		if err == nil {
+			t.Error("expected error for invalid date format")
+		}
+		if !strings.Contains(output, "--date must be in YYYY-MM-DD format") {
+			t.Errorf("expected date format error message, got: %s", output)
+		}
+	})
+
+	t.Run("invalid date value", func(t *testing.T) {
+		output, err := runApp(t, workDir, "add",
+			"--company", "TestCorp",
+			"--role", "Engineer",
+			"--date", "not-a-date")
+		if err == nil {
+			t.Error("expected error for invalid date")
+		}
+		if !strings.Contains(output, "--date must be in YYYY-MM-DD format") {
+			t.Errorf("expected date format error message, got: %s", output)
 		}
 	})
 }
@@ -278,6 +366,8 @@ func TestCLIHelp(t *testing.T) {
 	expectedFlags := []string{
 		"--company",
 		"--role",
+		"--status",
+		"--date",
 		"--jd-url",
 		"--jd-content",
 		"--jd-file",
