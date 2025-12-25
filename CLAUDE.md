@@ -53,6 +53,8 @@ This applies to all skills, resumes, cover letters, and any generated text.
   - `cover_letter.html` / `cover_letter.pdf`
 - `output/` - Legacy files (pre-restructure)
 - `scripts/` - CLI tools (html-to-pdf.js)
+- `bin/` - Go binaries (app)
+- `applications.jsonl` - Job application tracker data
 - `.claude/skills/` - Skill definitions
 
 ## PDF Generation
@@ -61,4 +63,16 @@ After generating HTML files, convert to PDF:
 ```bash
 npm install                                    # First time only
 npm run pdf outputs/company_role/resume.html   # Convert single file
+```
+
+## Application Tracker
+
+Track job applications using the CLI or `/applications` skill:
+```bash
+./bin/app init             # Initialize tracker (first time)
+./bin/app add              # Add new application (interactive)
+./bin/app list             # List all applications
+./bin/app show <id>        # Show application details
+./bin/app update <id>      # Update status/notes
+./bin/app remove <id>      # Remove application
 ```
