@@ -20,13 +20,13 @@ brew install bragger
 ### Go Install
 
 ```bash
-go install github.com/ewurch/bragger/cmd/bragger@latest
+go install github.com/ewurch/braggerger/cmd/bragger@latest
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/ewurch/bragger.git
+git clone https://github.com/ewurch/braggerger.git
 cd bragger
 go build -o bragger ./cmd/bragger
 ```
