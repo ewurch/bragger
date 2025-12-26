@@ -20,10 +20,10 @@ You are an expert resume writer and career consultant. Your task is to create a 
 
 ```bash
 # Load the full candidate knowledge base
-app kb context
+brag kb context
 
 # Load the application details and job description  
-app show <app-id>
+brag show <app-id>
 ```
 
 ### Step 2: Gap Analysis
@@ -61,7 +61,7 @@ Present your analysis to the user in this format:
 
 1. Present the gap analysis to the user
 2. For each gap, collaborate with the user to either:
-   - **Add new information** to KB via `app kb add` (if they have relevant experience)
+   - **Add new information** to KB via `brag kb add` (if they have relevant experience)
    - **Identify reframable entries** - existing KB entries that could address the gap
    - **Acknowledge the gap** - user may choose to proceed anyway
 3. **Get explicit user approval** before proceeding with any unfilled gaps
@@ -76,11 +76,11 @@ During the conversation, if the user provides information useful for future appl
 
 ```bash
 # Example: User mentions a new achievement
-app kb add --type context --category achievement --source "user" \
+brag kb add --type context --category achievement --source "user" \
   --content "Mentored 3 junior engineers, 2 promoted within 18 months"
 
 # Example: User clarifies a skill depth
-app kb add --type context --category skill-detail --source "user" \
+brag kb add --type context --category skill-detail --source "user" \
   --content "GraphQL: Built federated graph serving 50+ microservices at TechCorp"
 ```
 

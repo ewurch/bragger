@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ewurch/resume-tracker/internal/models"
+	"github.com/ewurch/brag/internal/models"
 )
 
 func setupKBTestStorage(t *testing.T) (*KBStorage, string, func()) {

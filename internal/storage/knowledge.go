@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ewurch/resume-tracker/internal/models"
+	"github.com/ewurch/brag/internal/models"
 )
 
 const DefaultKBFilePath = "candidate-kb.jsonl"

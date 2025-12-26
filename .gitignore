@@ -1,4 +1,17 @@
+# Dependencies
 node_modules/
-outputs/
 
+# Build artifacts
+bin/
+
+# macOS
 .DS_Store
+
+# Workspace files (for development testing)
+applications.jsonl
+candidate-kb.jsonl
+outputs/
+.brag/
+
+# Personal files that may be accidentally created
+*.pdf

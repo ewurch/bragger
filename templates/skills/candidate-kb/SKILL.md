@@ -37,29 +37,29 @@ Accumulated details from applications and conversations:
 
 ```bash
 # Show all KB entries
-./bin/app kb show
+./bin/brag kb show
 
 # Show only profile or context
-./bin/app kb show profile
-./bin/app kb show context
+./bin/brag kb show profile
+./bin/brag kb show context
 
 # Add profile entry
-./bin/app kb add --type profile --category contact --source "cv-import" \
+./bin/brag kb add --type profile --category contact --source "cv-import" \
   --data '{"name":"John Doe","email":"john@example.com"}'
 
 # Add experience
-./bin/app kb add --type profile --category experience --source "cv-import" \
+./bin/brag kb add --type profile --category experience --source "cv-import" \
   --data '{"company":"Acme","role":"Senior Engineer","start_date":"2020-01","end_date":"present"}'
 
 # Add context entry
-./bin/app kb add --type context --category achievement --source "user" \
+./bin/brag kb add --type context --category achievement --source "user" \
   --content "Led migration to microservices, reducing latency by 40%"
 
 # Update entry
-./bin/app kb update kb-xxx --content "Updated description"
+./bin/brag kb update kb-xxx --content "Updated description"
 
 # Remove entry
-./bin/app kb remove kb-xxx
+./bin/brag kb remove kb-xxx
 ```
 
 ## Capabilities
@@ -71,7 +71,7 @@ When user provides a CV/resume file or text, parse it and populate the KB:
 **Process:**
 1. Read the CV content (use Read tool for files)
 2. Extract structured information for each category
-3. Use CLI to add entries: `./bin/app kb add --type profile --category <cat> --data '<json>'`
+3. Use CLI to add entries: `./bin/brag kb add --type profile --category <cat> --data '<json>'`
 4. Set source to "cv-import" for traceability
 
 **Example workflow:**
@@ -91,8 +91,8 @@ User: "Here's my CV: [paste or file path]"
 When generating a resume or cover letter, query the KB first:
 
 ```bash
-./bin/app kb show profile   # Get all profile data
-./bin/app kb show context   # Get contextual details
+./bin/brag kb show profile   # Get all profile data
+./bin/brag kb show context   # Get contextual details
 ```
 
 Parse the output and use relevant information to tailor the resume.
@@ -132,7 +132,7 @@ During conversations, capture and store valuable details:
 2. Add as context entry with source "user"
 
 ```bash
-./bin/app kb add --type context --category achievement --source "user" \
+./bin/brag kb add --type context --category achievement --source "user" \
   --content "Led team of 5 engineers"
 ```
 
@@ -196,7 +196,7 @@ Never fabricate or assume information not in KB.
 **User:** "What do you know about my experience?"
 
 **Response:**
-1. Run `./bin/app kb show experience`
+1. Run `./bin/brag kb show experience`
 2. Parse and present in readable format
 
 ---
@@ -206,7 +206,7 @@ Never fabricate or assume information not in KB.
 **Response:**
 1. Add context entry:
    ```bash
-   ./bin/app kb add --type context --category achievement --source "user" \
+   ./bin/brag kb add --type context --category achievement --source "user" \
      --content "Mentored 3 junior developers at Acme Corp"
    ```
 2. Confirm: "Added to your knowledge base. I'll include this when relevant for future applications."

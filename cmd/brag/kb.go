@@ -7,15 +7,15 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/ewurch/resume-tracker/internal/models"
-	"github.com/ewurch/resume-tracker/internal/storage"
+	"github.com/ewurch/brag/internal/models"
+	"github.com/ewurch/brag/internal/storage"
 )
 
 func printKBUsage() {
 	fmt.Println(`Candidate Knowledge Base - Manage your profile and contextual information
 
 Usage:
-  app kb <subcommand> [arguments]
+  brag kb <subcommand> [arguments]
 
 Subcommands:
   show [profile|context]   Show knowledge base entries (all, profile only, or context only)
@@ -40,25 +40,25 @@ Profile Categories & Required Fields:
   languages:      language (optional: proficiency)
 
 Examples:
-  app kb show                                    # Show all KB entries
-  app kb show profile                            # Show profile entries only
-  app kb show context                            # Show context entries only
-  app kb context                                 # Export full KB in markdown (for LLM context)
+  brag kb show                                    # Show all KB entries
+  brag kb show profile                            # Show profile entries only
+  brag kb show context                            # Show context entries only
+  brag kb context                                 # Export full KB in markdown (for LLM context)
 
   # Add contact info
-  app kb add --type profile --category contact --source "cv-import" \
+  brag kb add --type profile --category contact --source "cv-import" \
     --data '{"name":"John Doe","email":"john@example.com","location":"New York"}'
 
   # Add work experience
-  app kb add --type profile --category experience --source "cv-import" \
+  brag kb add --type profile --category experience --source "cv-import" \
     --data '{"company":"Acme Corp","role":"Senior Engineer","start_date":"2020-01","end_date":"present"}'
 
   # Add contextual information
-  app kb add --type context --category achievement --source "user" \
+  brag kb add --type context --category achievement --source "user" \
     --content "Led migration to microservices, reducing latency by 40%"
 
-  app kb update kb-a1b2c3d4 --content "Updated achievement description"
-  app kb remove kb-a1b2c3d4`)
+  brag kb update kb-a1b2c3d4 --content "Updated achievement description"
+  brag kb remove kb-a1b2c3d4`)
 }
 
 // kbFlags holds flags for kb add/update commands
@@ -94,13 +94,13 @@ func cmdKB(store *storage.KBStorage, subcommand string, args []string) {
 		cmdKBAdd(store, args)
 	case "update":
 		if len(args) < 1 {
-			fmt.Println("Usage: app kb update <id> [flags]")
+			fmt.Println("Usage: brag kb update <id> [flags]")
 			os.Exit(1)
 		}
 		cmdKBUpdate(store, args[0], args[1:])
 	case "remove":
 		if len(args) < 1 {
-			fmt.Println("Usage: app kb remove <id>")
+			fmt.Println("Usage: brag kb remove <id>")
 			os.Exit(1)
 		}
 		cmdKBRemove(store, args[0])
@@ -190,7 +190,7 @@ func cmdKBContext(store *storage.KBStorage) {
 
 	if len(entries) == 0 {
 		fmt.Println("# Candidate Knowledge Base")
-		fmt.Println("\n*No entries found. Use `app kb add` to populate the knowledge base.*")
+		fmt.Println("\n*No entries found. Use `brag kb add` to populate the knowledge base.*")
 		return
 	}
 

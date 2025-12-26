@@ -9,8 +9,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/ewurch/resume-tracker/internal/models"
-	"github.com/ewurch/resume-tracker/internal/storage"
+	"github.com/ewurch/brag/internal/models"
+	"github.com/ewurch/brag/internal/storage"
 )
 
 // appFlags holds all the optional flags for add/update commands
@@ -145,22 +145,24 @@ func main() {
 		cmdList(store)
 	case "update":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: app update <id> [flags]")
+			fmt.Println("Usage: brag update <id> [flags]")
 			os.Exit(1)
 		}
 		cmdUpdate(store, os.Args[2], os.Args[3:])
 	case "remove":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: app remove <id>")
+			fmt.Println("Usage: brag remove <id>")
 			os.Exit(1)
 		}
 		cmdRemove(store, os.Args[2])
 	case "show":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: app show <id>")
+			fmt.Println("Usage: brag show <id>")
 			os.Exit(1)
 		}
 		cmdShow(store, os.Args[2])
+	case "upgrade":
+		cmdUpgrade()
 	case "kb":
 		if len(os.Args) < 3 {
 			printKBUsage()
@@ -177,19 +179,20 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Println(`Application Tracker - Track your job applications
+	fmt.Println(`Brag - Job application tracker and AI-powered resume generator
 
 Usage:
-  app <command> [arguments]
+  brag <command> [arguments]
 
 Commands:
-  init             Initialize tracker (creates applications.jsonl and candidate-kb.jsonl)
+  init             Initialize a Brag workspace in the current directory
   add              Add a new application
   list             List all applications
   show <id>        Show details of an application
   update <id>      Update an application
   remove <id>      Remove an application
-  kb <subcommand>  Manage candidate knowledge base (run 'app kb' for details)
+  kb <subcommand>  Manage candidate knowledge base (run 'brag kb' for details)
+  upgrade          Upgrade workspace to latest version
   help             Show this help message
 
 Flags for add command (optional - without flags, runs interactively):
@@ -208,72 +211,20 @@ Flags for update command (optional - without flags, runs interactively):
   All flags from add command are supported. Only provided flags will be updated.
 
 Examples:
-  app init
-  app add                                            # Interactive mode
-  app add --company "Acme" --role "Engineer"         # Flag mode (quick)
-  app add --company "Acme" --role "Engineer" --jd-url "https://..."
-  app add --company "Acme" --role "Engineer" --jd-file ./jd.txt
-  app add --company "Old" --role "Dev" --date "2025-01-15" --status "interviewing"
-  app list
-  app show app-a1b2c3d4
-  app update app-a1b2c3d4                            # Interactive mode
-  app update app-a1b2c3d4 --status "interviewing"    # Flag mode (quick)
-  app update app-a1b2c3d4 --status "offer" --notes "Accepted!"
-  app remove app-a1b2c3d4
-  app kb show                                        # Show knowledge base
-  app kb add --type profile --category contact --data '{"name":"John"}'`)
-}
-
-func cmdInit() {
-	appFilePath := storage.DefaultFilePath
-	kbFilePath := storage.DefaultKBFilePath
-
-	appExists := false
-	kbExists := false
-
-	// Check if application file already exists
-	if _, err := os.Stat(appFilePath); err == nil {
-		appExists = true
-	}
-
-	// Check if KB file already exists
-	if _, err := os.Stat(kbFilePath); err == nil {
-		kbExists = true
-	}
-
-	if appExists && kbExists {
-		fmt.Printf("Already initialized (%s and %s exist)\n", appFilePath, kbFilePath)
-		return
-	}
-
-	// Create applications.jsonl if needed
-	if !appExists {
-		file, err := os.Create(appFilePath)
-		if err != nil {
-			fmt.Printf("Error creating %s: %v\n", appFilePath, err)
-			os.Exit(1)
-		}
-		file.Close()
-		fmt.Printf("Created: %s\n", appFilePath)
-	}
-
-	// Create candidate-kb.jsonl if needed
-	if !kbExists {
-		file, err := os.Create(kbFilePath)
-		if err != nil {
-			fmt.Printf("Error creating %s: %v\n", kbFilePath, err)
-			os.Exit(1)
-		}
-		file.Close()
-		fmt.Printf("Created: %s\n", kbFilePath)
-	}
-
-	fmt.Println("\nInitialized application tracker!")
-	fmt.Println("\nNext steps:")
-	fmt.Println("  app add       - Add your first application")
-	fmt.Println("  app kb add    - Add candidate profile info")
-	fmt.Println("  app list      - View all applications")
-	fmt.Println("  app kb show   - View candidate knowledge base")
+  brag init
+  brag add                                            # Interactive mode
+  brag add --company "Acme" --role "Engineer"         # Flag mode (quick)
+  brag add --company "Acme" --role "Engineer" --jd-url "https://..."
+  brag add --company "Acme" --role "Engineer" --jd-file ./jd.txt
+  brag add --company "Old" --role "Dev" --date "2025-01-15" --status "interviewing"
+  brag list
+  brag show app-a1b2c3d4
+  brag update app-a1b2c3d4                            # Interactive mode
+  brag update app-a1b2c3d4 --status "interviewing"    # Flag mode (quick)
+  brag update app-a1b2c3d4 --status "offer" --notes "Accepted!"
+  brag remove app-a1b2c3d4
+  brag kb show                                        # Show knowledge base
+  brag kb add --type profile --category contact --data '{"name":"John"}'`)
 }
 
 func cmdAdd(store *storage.Storage, args []string) {
