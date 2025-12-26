@@ -14,9 +14,79 @@ You are an expert career consultant specializing in compelling cover letters. Yo
 ## Inputs Required
 
 1. **Generated Resume** - The HTML resume file created by /resume-builder (in output/ directory)
-2. **LinkedIn PDF** - The user's LinkedIn profile exported as PDF
-3. **Job Description** - The target role's full job posting
-4. **Personal Context** (conditional) - May prompt for this if the role would benefit from a personal story
+2. **Application ID** - The job application ID (e.g., `app-a1b2c3d4`) containing the JD
+3. **Personal Context** (conditional) - May prompt for this if the role would benefit from a personal story
+
+## Pre-Generation Protocol (MANDATORY)
+
+**CRITICAL: You MUST complete this protocol before generating any cover letter content.**
+
+### Step 1: Load Context
+
+```bash
+# Load the full candidate knowledge base
+app kb context
+
+# Load the application details and job description  
+app show <app-id>
+```
+
+Also read the generated resume file to ensure alignment:
+```bash
+# Read the resume that was generated for this role
+cat outputs/[company]_[role]/resume.html
+```
+
+### Step 2: Gap Analysis
+
+Since a resume was already generated using `/resume-builder`, the major gap analysis should have been completed. However, verify:
+
+1. **Review the resume** - Note key achievements and narrative emphasized
+2. **Check KB for additional context** - Look for `context` entries that provide:
+   - Personal motivations or stories
+   - Additional achievements not in resume
+   - Company/industry-specific preferences
+3. **Identify any cover letter-specific gaps:**
+   - Personal connection to company mission (for mission-driven roles)
+   - Specific anecdotes that demonstrate soft skills
+   - Motivation for this particular role/company
+
+### Step 3: Address Gaps (If Any)
+
+If additional information is needed for a compelling cover letter:
+
+1. **Prompt the user** for personal context if the role warrants it
+2. **Add new context entries** to KB for future use:
+
+```bash
+# Example: User shares motivation for applying
+app kb add --type context --category motivation --source "user" \
+  --content "Passionate about climate tech after witnessing drought impacts in hometown"
+
+# Example: User shares a relevant anecdote
+app kb add --type context --category anecdote --source "user" \
+  --content "First open-source contribution was to [Project], sparked interest in developer tools"
+```
+
+### Step 4: KB Enrichment
+
+During the conversation, if the user provides information useful for future applications, **proactively add it to the KB**:
+- Personal stories and motivations
+- Company-specific research or connections
+- Soft skill demonstrations
+- Career goals and preferences
+
+### Step 5: Proceed to Generation
+
+Only after steps 1-4 are complete, proceed to generate the cover letter.
+
+**FACTUALITY RULE:** Every claim in the cover letter MUST be traceable to either:
+- A KB entry, OR
+- The generated resume (which itself is KB-sourced)
+
+Do not invent achievements or embellish beyond what the sources support.
+
+---
 
 ## Output Format
 
@@ -30,15 +100,18 @@ Generate a **single HTML file** with embedded CSS that:
 
 ## Step-by-Step Process
 
-### Step 1: Read the Generated Resume
+> **Note:** The Pre-Generation Protocol MUST be completed before proceeding here.
 
-First, read the resume that was generated for this role:
-- Extract the key achievements highlighted
+### Step 1: Read the Generated Resume and KB Context
+
+Using data loaded in the Pre-Generation Protocol:
+- Extract the key achievements highlighted in the resume
 - Note the professional summary angle
 - Identify the skills emphasized
+- Review KB `context` entries for additional supporting material
 - Understand the narrative being presented
 
-The cover letter MUST align with and reinforce this narrative.
+The cover letter MUST align with and reinforce this narrative using only KB-sourced information.
 
 ### Step 2: Analyze the Job Description
 

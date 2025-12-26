@@ -876,6 +876,133 @@ func TestKBUpdate(t *testing.T) {
 	})
 }
 
+func TestKBContext(t *testing.T) {
+	workDir, cleanup := setupIntegrationTest(t)
+	defer cleanup()
+
+	kbPath := filepath.Join(workDir, "candidate-kb.jsonl")
+	os.WriteFile(kbPath, []byte{}, 0644)
+
+	t.Run("empty KB", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "context")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+		if !strings.Contains(output, "# Candidate Knowledge Base") {
+			t.Errorf("expected markdown header, got: %s", output)
+		}
+		if !strings.Contains(output, "No entries found") {
+			t.Errorf("expected empty message, got: %s", output)
+		}
+	})
+
+	// Add sample data
+	runApp(t, workDir, "kb", "add", "--type", "profile", "--category", "contact",
+		"--data", `{"name":"Jane Smith","email":"jane@example.com","location":"Berlin","linkedin":"linkedin.com/in/jane"}`)
+	runApp(t, workDir, "kb", "add", "--type", "profile", "--category", "experience",
+		"--data", `{"company":"TechCorp","role":"Senior Engineer","start_date":"2020-01","end_date":"present","highlights":["Led team of 5","Reduced latency by 40%"]}`)
+	runApp(t, workDir, "kb", "add", "--type", "profile", "--category", "education",
+		"--data", `{"institution":"MIT","degree":"BS Computer Science","field":"Computer Science","end_date":"2019"}`)
+	runApp(t, workDir, "kb", "add", "--type", "profile", "--category", "skills",
+		"--data", `{"languages":["Go","Python","TypeScript"],"frameworks":["React","FastAPI"],"databases":["PostgreSQL","Redis"]}`)
+	runApp(t, workDir, "kb", "add", "--type", "profile", "--category", "certifications",
+		"--data", `{"name":"AWS Solutions Architect","issuer":"Amazon","date":"2023-06"}`)
+	runApp(t, workDir, "kb", "add", "--type", "profile", "--category", "languages",
+		"--data", `{"language":"German","proficiency":"fluent"}`)
+	runApp(t, workDir, "kb", "add", "--type", "context", "--category", "achievement",
+		"--source", "user", "--content", "Built real-time notification system handling 10k msgs/sec")
+	runApp(t, workDir, "kb", "add", "--type", "context", "--category", "preference",
+		"--source", "user", "--content", "Prefer remote-first companies")
+
+	t.Run("full context output", func(t *testing.T) {
+		output, err := runApp(t, workDir, "kb", "context")
+		if err != nil {
+			t.Fatalf("command failed: %v\nOutput: %s", err, output)
+		}
+
+		// Check markdown structure
+		if !strings.Contains(output, "# Candidate Knowledge Base") {
+			t.Errorf("expected main header, got: %s", output)
+		}
+
+		// Check contact section
+		if !strings.Contains(output, "## Contact") {
+			t.Errorf("expected Contact section, got: %s", output)
+		}
+		if !strings.Contains(output, "**Name:** Jane Smith") {
+			t.Errorf("expected name in contact, got: %s", output)
+		}
+		if !strings.Contains(output, "**Email:** jane@example.com") {
+			t.Errorf("expected email in contact, got: %s", output)
+		}
+		if !strings.Contains(output, "**LinkedIn:** linkedin.com/in/jane") {
+			t.Errorf("expected linkedin in contact, got: %s", output)
+		}
+
+		// Check experience section
+		if !strings.Contains(output, "## Experience") {
+			t.Errorf("expected Experience section, got: %s", output)
+		}
+		if !strings.Contains(output, "### Senior Engineer @ TechCorp") {
+			t.Errorf("expected experience header, got: %s", output)
+		}
+		if !strings.Contains(output, "Led team of 5") {
+			t.Errorf("expected highlight, got: %s", output)
+		}
+
+		// Check education section
+		if !strings.Contains(output, "## Education") {
+			t.Errorf("expected Education section, got: %s", output)
+		}
+		if !strings.Contains(output, "BS Computer Science") {
+			t.Errorf("expected degree, got: %s", output)
+		}
+
+		// Check skills section
+		if !strings.Contains(output, "## Skills") {
+			t.Errorf("expected Skills section, got: %s", output)
+		}
+		if !strings.Contains(output, "**Programming Languages:** Go, Python, TypeScript") {
+			t.Errorf("expected languages in skills, got: %s", output)
+		}
+
+		// Check certifications section
+		if !strings.Contains(output, "## Certifications") {
+			t.Errorf("expected Certifications section, got: %s", output)
+		}
+		if !strings.Contains(output, "AWS Solutions Architect") {
+			t.Errorf("expected certification, got: %s", output)
+		}
+
+		// Check languages section
+		if !strings.Contains(output, "## Languages") {
+			t.Errorf("expected Languages section, got: %s", output)
+		}
+		if !strings.Contains(output, "**German** - fluent") {
+			t.Errorf("expected language entry, got: %s", output)
+		}
+
+		// Check context entries section
+		if !strings.Contains(output, "## Context Entries") {
+			t.Errorf("expected Context Entries section, got: %s", output)
+		}
+		if !strings.Contains(output, "### Achievement") {
+			t.Errorf("expected Achievement category, got: %s", output)
+		}
+		if !strings.Contains(output, "10k msgs/sec") {
+			t.Errorf("expected achievement content, got: %s", output)
+		}
+
+		// Check entry IDs are included
+		if !strings.Contains(output, "Entry ID: kb-") {
+			t.Errorf("expected entry IDs in output, got: %s", output)
+		}
+		if !strings.Contains(output, "ID: kb-") {
+			t.Errorf("expected IDs for context entries, got: %s", output)
+		}
+	})
+}
+
 func TestKBRemove(t *testing.T) {
 	workDir, cleanup := setupIntegrationTest(t)
 	defer cleanup()

@@ -19,6 +19,7 @@ Usage:
 
 Subcommands:
   show [profile|context]   Show knowledge base entries (all, profile only, or context only)
+  context                  Export full KB in LLM-friendly markdown format
   add                      Add a new KB entry
   update <id>              Update an existing KB entry
   remove <id>              Remove a KB entry
@@ -42,6 +43,7 @@ Examples:
   app kb show                                    # Show all KB entries
   app kb show profile                            # Show profile entries only
   app kb show context                            # Show context entries only
+  app kb context                                 # Export full KB in markdown (for LLM context)
 
   # Add contact info
   app kb add --type profile --category contact --source "cv-import" \
@@ -86,6 +88,8 @@ func cmdKB(store *storage.KBStorage, subcommand string, args []string) {
 	switch subcommand {
 	case "show":
 		cmdKBShow(store, args)
+	case "context":
+		cmdKBContext(store)
 	case "add":
 		cmdKBAdd(store, args)
 	case "update":
@@ -175,6 +179,301 @@ func cmdKBShow(store *storage.KBStorage, args []string) {
 		w.Flush()
 		fmt.Printf("\nContext entries: %d\n", len(contextEntries))
 	}
+}
+
+func cmdKBContext(store *storage.KBStorage) {
+	entries, err := store.Load()
+	if err != nil {
+		fmt.Printf("Error loading knowledge base: %v\n", err)
+		os.Exit(1)
+	}
+
+	if len(entries) == 0 {
+		fmt.Println("# Candidate Knowledge Base")
+		fmt.Println("\n*No entries found. Use `app kb add` to populate the knowledge base.*")
+		return
+	}
+
+	// Group entries by type and category
+	var contact *models.KBEntry
+	var experiences []*models.KBEntry
+	var education []*models.KBEntry
+	var skills *models.KBEntry
+	var certifications []*models.KBEntry
+	var languages []*models.KBEntry
+	var contextEntries []*models.KBEntry
+
+	for _, e := range entries {
+		if e.Type == models.KBTypeProfile {
+			switch models.ProfileCategory(e.Category) {
+			case models.CategoryContact:
+				contact = e
+			case models.CategoryExperience:
+				experiences = append(experiences, e)
+			case models.CategoryEducation:
+				education = append(education, e)
+			case models.CategorySkills:
+				skills = e
+			case models.CategoryCertifications:
+				certifications = append(certifications, e)
+			case models.CategoryLanguages:
+				languages = append(languages, e)
+			}
+		} else {
+			contextEntries = append(contextEntries, e)
+		}
+	}
+
+	// Output in LLM-friendly markdown format
+	fmt.Println("# Candidate Knowledge Base")
+	fmt.Println()
+
+	// Contact
+	if contact != nil {
+		fmt.Println("## Contact")
+		fmt.Printf("*Entry ID: %s*\n\n", contact.ID)
+		printContactMarkdown(contact)
+		fmt.Println()
+	}
+
+	// Experience
+	if len(experiences) > 0 {
+		fmt.Println("## Experience")
+		fmt.Println()
+		for _, e := range experiences {
+			printExperienceMarkdown(e)
+			fmt.Println()
+		}
+	}
+
+	// Education
+	if len(education) > 0 {
+		fmt.Println("## Education")
+		fmt.Println()
+		for _, e := range education {
+			printEducationMarkdown(e)
+			fmt.Println()
+		}
+	}
+
+	// Skills
+	if skills != nil {
+		fmt.Println("## Skills")
+		fmt.Printf("*Entry ID: %s*\n\n", skills.ID)
+		printSkillsMarkdown(skills)
+		fmt.Println()
+	}
+
+	// Certifications
+	if len(certifications) > 0 {
+		fmt.Println("## Certifications")
+		fmt.Println()
+		for _, e := range certifications {
+			printCertificationMarkdown(e)
+		}
+		fmt.Println()
+	}
+
+	// Languages
+	if len(languages) > 0 {
+		fmt.Println("## Languages")
+		fmt.Println()
+		for _, e := range languages {
+			printLanguageMarkdown(e)
+		}
+		fmt.Println()
+	}
+
+	// Context entries grouped by category
+	if len(contextEntries) > 0 {
+		fmt.Println("## Context Entries")
+		fmt.Println()
+
+		// Group by category
+		categories := make(map[string][]*models.KBEntry)
+		for _, e := range contextEntries {
+			categories[e.Category] = append(categories[e.Category], e)
+		}
+
+		for category, entries := range categories {
+			fmt.Printf("### %s\n\n", capitalizeFirst(category))
+			for _, e := range entries {
+				fmt.Printf("- %s *(ID: %s, source: %s)*\n", e.Content, e.ID, e.Source)
+			}
+			fmt.Println()
+		}
+	}
+}
+
+func printContactMarkdown(e *models.KBEntry) {
+	dataBytes, err := json.Marshal(e.Data)
+	if err != nil {
+		return
+	}
+	var c models.ContactData
+	if json.Unmarshal(dataBytes, &c) != nil {
+		return
+	}
+
+	fmt.Printf("- **Name:** %s\n", c.Name)
+	fmt.Printf("- **Email:** %s\n", c.Email)
+	if c.Phone != "" {
+		fmt.Printf("- **Phone:** %s\n", c.Phone)
+	}
+	if c.Location != "" {
+		fmt.Printf("- **Location:** %s\n", c.Location)
+	}
+	if c.LinkedIn != "" {
+		fmt.Printf("- **LinkedIn:** %s\n", c.LinkedIn)
+	}
+	if c.GitHub != "" {
+		fmt.Printf("- **GitHub:** %s\n", c.GitHub)
+	}
+	if c.Website != "" {
+		fmt.Printf("- **Website:** %s\n", c.Website)
+	}
+}
+
+func printExperienceMarkdown(e *models.KBEntry) {
+	dataBytes, err := json.Marshal(e.Data)
+	if err != nil {
+		return
+	}
+	var exp models.ExperienceEntry
+	if json.Unmarshal(dataBytes, &exp) != nil {
+		return
+	}
+
+	endDate := exp.EndDate
+	if endDate == "" {
+		endDate = "present"
+	}
+
+	fmt.Printf("### %s @ %s\n", exp.Role, exp.Company)
+	fmt.Printf("*Entry ID: %s*\n\n", e.ID)
+	fmt.Printf("**Period:** %s - %s\n", exp.StartDate, endDate)
+	if exp.Location != "" {
+		fmt.Printf("**Location:** %s\n", exp.Location)
+	}
+	if exp.Description != "" {
+		fmt.Printf("\n%s\n", exp.Description)
+	}
+	if len(exp.Highlights) > 0 {
+		fmt.Println("\n**Highlights:**")
+		for _, h := range exp.Highlights {
+			fmt.Printf("- %s\n", h)
+		}
+	}
+}
+
+func printEducationMarkdown(e *models.KBEntry) {
+	dataBytes, err := json.Marshal(e.Data)
+	if err != nil {
+		return
+	}
+	var edu models.EducationEntry
+	if json.Unmarshal(dataBytes, &edu) != nil {
+		return
+	}
+
+	fmt.Printf("### %s", edu.Degree)
+	if edu.Field != "" {
+		fmt.Printf(" in %s", edu.Field)
+	}
+	fmt.Printf(" - %s\n", edu.Institution)
+	fmt.Printf("*Entry ID: %s*\n", e.ID)
+
+	if edu.StartDate != "" || edu.EndDate != "" {
+		fmt.Printf("**Period:** %s - %s\n", edu.StartDate, edu.EndDate)
+	}
+	if edu.GPA != "" {
+		fmt.Printf("**GPA:** %s\n", edu.GPA)
+	}
+}
+
+func printSkillsMarkdown(e *models.KBEntry) {
+	dataBytes, err := json.Marshal(e.Data)
+	if err != nil {
+		return
+	}
+	var s models.SkillsData
+	if json.Unmarshal(dataBytes, &s) != nil {
+		return
+	}
+
+	if len(s.Languages) > 0 {
+		fmt.Printf("- **Programming Languages:** %s\n", joinStrings(s.Languages))
+	}
+	if len(s.Frameworks) > 0 {
+		fmt.Printf("- **Frameworks:** %s\n", joinStrings(s.Frameworks))
+	}
+	if len(s.Tools) > 0 {
+		fmt.Printf("- **Tools:** %s\n", joinStrings(s.Tools))
+	}
+	if len(s.Databases) > 0 {
+		fmt.Printf("- **Databases:** %s\n", joinStrings(s.Databases))
+	}
+	if len(s.Cloud) > 0 {
+		fmt.Printf("- **Cloud:** %s\n", joinStrings(s.Cloud))
+	}
+	if len(s.Other) > 0 {
+		fmt.Printf("- **Other:** %s\n", joinStrings(s.Other))
+	}
+}
+
+func printCertificationMarkdown(e *models.KBEntry) {
+	dataBytes, err := json.Marshal(e.Data)
+	if err != nil {
+		return
+	}
+	var c models.CertificationEntry
+	if json.Unmarshal(dataBytes, &c) != nil {
+		return
+	}
+
+	fmt.Printf("- **%s**", c.Name)
+	if c.Issuer != "" {
+		fmt.Printf(" by %s", c.Issuer)
+	}
+	if c.Date != "" {
+		fmt.Printf(" (%s)", c.Date)
+	}
+	fmt.Printf(" *(ID: %s)*\n", e.ID)
+}
+
+func printLanguageMarkdown(e *models.KBEntry) {
+	dataBytes, err := json.Marshal(e.Data)
+	if err != nil {
+		return
+	}
+	var l models.LanguageEntry
+	if json.Unmarshal(dataBytes, &l) != nil {
+		return
+	}
+
+	fmt.Printf("- **%s**", l.Language)
+	if l.Proficiency != "" {
+		fmt.Printf(" - %s", l.Proficiency)
+	}
+	fmt.Printf(" *(ID: %s)*\n", e.ID)
+}
+
+func joinStrings(s []string) string {
+	result := ""
+	for i, str := range s {
+		if i > 0 {
+			result += ", "
+		}
+		result += str
+	}
+	return result
+}
+
+func capitalizeFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	return string(s[0]-32) + s[1:]
 }
 
 func summarizeProfileData(e *models.KBEntry) string {
