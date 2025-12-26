@@ -3,6 +3,7 @@
 import puppeteer from 'puppeteer';
 import { resolve, dirname, basename } from 'path';
 import { existsSync } from 'fs';
+import { spawn, exec } from 'child_process';
 
 const htmlPath = process.argv[2];
 
@@ -47,3 +48,10 @@ await page.pdf({
 await browser.close();
 
 console.log('Done!');
+
+// Copy path to clipboard for easy pasting in file dialogs (Cmd+Shift+G)
+exec(`echo "${pdfPath}" | pbcopy`);
+console.log('Path copied to clipboard');
+
+// Reveal in Finder for drag-and-drop
+spawn('open', ['-R', pdfPath], { detached: true, stdio: 'ignore' });
