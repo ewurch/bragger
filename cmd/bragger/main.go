@@ -9,8 +9,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/ewurch/brag/internal/models"
-	"github.com/ewurch/brag/internal/storage"
+	"github.com/ewurch/bragger/internal/models"
+	"github.com/ewurch/bragger/internal/storage"
 )
 
 // appFlags holds all the optional flags for add/update commands
@@ -145,19 +145,19 @@ func main() {
 		cmdList(store)
 	case "update":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: brag update <id> [flags]")
+			fmt.Println("Usage: bragger update <id> [flags]")
 			os.Exit(1)
 		}
 		cmdUpdate(store, os.Args[2], os.Args[3:])
 	case "remove":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: brag remove <id>")
+			fmt.Println("Usage: bragger remove <id>")
 			os.Exit(1)
 		}
 		cmdRemove(store, os.Args[2])
 	case "show":
 		if len(os.Args) < 3 {
-			fmt.Println("Usage: brag show <id>")
+			fmt.Println("Usage: bragger show <id>")
 			os.Exit(1)
 		}
 		cmdShow(store, os.Args[2])
@@ -179,19 +179,19 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Println(`Brag - Job application tracker and AI-powered resume generator
+	fmt.Println(`Bragger - Job application tracker and AI-powered resume generator
 
 Usage:
-  brag <command> [arguments]
+  bragger <command> [arguments]
 
 Commands:
-  init             Initialize a Brag workspace in the current directory
+  init             Initialize a Bragger workspace in the current directory
   add              Add a new application
   list             List all applications
   show <id>        Show details of an application
   update <id>      Update an application
   remove <id>      Remove an application
-  kb <subcommand>  Manage candidate knowledge base (run 'brag kb' for details)
+  kb <subcommand>  Manage candidate knowledge base (run 'bragger kb' for details)
   upgrade          Upgrade workspace to latest version
   help             Show this help message
 
@@ -211,20 +211,20 @@ Flags for update command (optional - without flags, runs interactively):
   All flags from add command are supported. Only provided flags will be updated.
 
 Examples:
-  brag init
-  brag add                                            # Interactive mode
-  brag add --company "Acme" --role "Engineer"         # Flag mode (quick)
-  brag add --company "Acme" --role "Engineer" --jd-url "https://..."
-  brag add --company "Acme" --role "Engineer" --jd-file ./jd.txt
-  brag add --company "Old" --role "Dev" --date "2025-01-15" --status "interviewing"
-  brag list
-  brag show app-a1b2c3d4
-  brag update app-a1b2c3d4                            # Interactive mode
-  brag update app-a1b2c3d4 --status "interviewing"    # Flag mode (quick)
-  brag update app-a1b2c3d4 --status "offer" --notes "Accepted!"
-  brag remove app-a1b2c3d4
-  brag kb show                                        # Show knowledge base
-  brag kb add --type profile --category contact --data '{"name":"John"}'`)
+  bragger init
+  bragger add                                            # Interactive mode
+  bragger add --company "Acme" --role "Engineer"         # Flag mode (quick)
+  bragger add --company "Acme" --role "Engineer" --jd-url "https://..."
+  bragger add --company "Acme" --role "Engineer" --jd-file ./jd.txt
+  bragger add --company "Old" --role "Dev" --date "2025-01-15" --status "interviewing"
+  bragger list
+  bragger show app-a1b2c3d4
+  bragger update app-a1b2c3d4                            # Interactive mode
+  bragger update app-a1b2c3d4 --status "interviewing"    # Flag mode (quick)
+  bragger update app-a1b2c3d4 --status "offer" --notes "Accepted!"
+  bragger remove app-a1b2c3d4
+  bragger kb show                                        # Show knowledge base
+  bragger kb add --type profile --category contact --data '{"name":"John"}'`)
 }
 
 func cmdAdd(store *storage.Storage, args []string) {

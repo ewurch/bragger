@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ewurch/brag/internal/models"
+	"github.com/ewurch/bragger/internal/models"
 )
 
 func setupTestStorage(t *testing.T) (*Storage, string, func()) {

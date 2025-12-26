@@ -1,6 +1,6 @@
 # Agent Instructions
 
-This workspace uses **Brag** for job application tracking and AI-powered resume/cover letter generation.
+This workspace uses **Bragger** for job application tracking and AI-powered resume/cover letter generation.
 
 ## Candidate Knowledge Base
 
@@ -8,16 +8,16 @@ A knowledge base (`candidate-kb.jsonl`) stores verified candidate information fo
 
 **Quick reference:**
 ```bash
-brag kb show              # View all entries (tabular)
-brag kb context           # Export full KB in markdown (for LLM context)
-brag kb add               # Add new entries
-brag kb update <id>       # Update existing entry
-brag kb remove <id>       # Remove entry
+bragger kb show              # View all entries (tabular)
+bragger kb context           # Export full KB in markdown (for LLM context)
+bragger kb add               # Add new entries
+bragger kb update <id>       # Update existing entry
+bragger kb remove <id>       # Remove entry
 ```
 
 **When generating resumes or cover letters, agents MUST:**
-1. Load KB context via `brag kb context`
-2. Load the application/JD via `brag show <app-id>`
+1. Load KB context via `bragger kb context`
+2. Load the application/JD via `bragger show <app-id>`
 3. Analyze JD requirements against KB entries (gap analysis)
 4. Identify gaps and collaborate with user to fill them
 5. **Get explicit user approval before proceeding with any gaps**
@@ -29,11 +29,11 @@ See `/resume-builder` and `/cover-letter` skills for detailed pre-generation pro
 ## Application Tracking
 
 ```bash
-brag add                  # Add a new job application
-brag list                 # List all applications
-brag show <id>            # Show application details with JD
-brag update <id>          # Update application status
-brag remove <id>          # Remove an application
+bragger add                  # Add a new job application
+bragger list                 # List all applications
+bragger show <id>            # Show application details with JD
+bragger update <id>          # Update application status
+bragger remove <id>          # Remove an application
 ```
 
 ## PDF Generation

@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ewurch/brag/internal/models"
+	"github.com/ewurch/bragger/internal/models"
 )
 
 const DefaultFilePath = "applications.jsonl"

@@ -25,10 +25,10 @@ You are an expert career consultant specializing in compelling cover letters. Yo
 
 ```bash
 # Load the full candidate knowledge base
-brag kb context
+bragger kb context
 
 # Load the application details and job description  
-brag show <app-id>
+bragger show <app-id>
 ```
 
 Also read the generated resume file to ensure alignment:
@@ -60,11 +60,11 @@ If additional information is needed for a compelling cover letter:
 
 ```bash
 # Example: User shares motivation for applying
-brag kb add --type context --category motivation --source "user" \
+bragger kb add --type context --category motivation --source "user" \
   --content "Passionate about climate tech after witnessing drought impacts in hometown"
 
 # Example: User shares a relevant anecdote
-brag kb add --type context --category anecdote --source "user" \
+bragger kb add --type context --category anecdote --source "user" \
   --content "First open-source contribution was to [Project], sparked interest in developer tools"
 ```
 

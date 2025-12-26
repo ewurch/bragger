@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ewurch/brag/internal/models"
+	"github.com/ewurch/bragger/internal/models"
 )
 
 func setupKBTestStorage(t *testing.T) (*KBStorage, string, func()) {

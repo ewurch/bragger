@@ -1,3 +1,3 @@
-module github.com/ewurch/brag
+module github.com/ewurch/bragger
 
 go 1.23

@@ -11,7 +11,7 @@ bin/
 applications.jsonl
 candidate-kb.jsonl
 outputs/
-.brag/
+.bragger/
 
 # Personal files that may be accidentally created
 *.pdf

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ewurch/brag/templates"
+	"github.com/ewurch/bragger/templates"
 )
 
 func cmdInit() {
@@ -17,20 +17,20 @@ func cmdInit() {
 	}
 
 	// Check if already initialized
-	bragDir := filepath.Join(cwd, ".brag")
+	bragDir := filepath.Join(cwd, ".bragger")
 	if _, err := os.Stat(bragDir); err == nil {
-		fmt.Println("Workspace already initialized. Use 'brag upgrade' to update to the latest version.")
+		fmt.Println("Workspace already initialized. Use 'bragger upgrade' to update to the latest version.")
 		return
 	}
 
-	fmt.Printf("Initializing Brag workspace in %s\n\n", cwd)
+	fmt.Printf("Initializing Bragger workspace in %s\n\n", cwd)
 
 	var created []string
 	var skipped []string
 
-	// Create .brag directory with version file
+	// Create .bragger directory with version file
 	if err := os.MkdirAll(bragDir, 0755); err != nil {
-		fmt.Printf("Error creating .brag directory: %v\n", err)
+		fmt.Printf("Error creating .bragger directory: %v\n", err)
 		os.Exit(1)
 	}
 	versionFile := filepath.Join(bragDir, "version")
@@ -38,7 +38,7 @@ func cmdInit() {
 		fmt.Printf("Error creating version file: %v\n", err)
 		os.Exit(1)
 	}
-	created = append(created, ".brag/version")
+	created = append(created, ".bragger/version")
 
 	// Create .claude/skills directories and copy skill files
 	skillDirs := []string{
@@ -156,8 +156,8 @@ func cmdInit() {
 
 	fmt.Println("\nNext steps:")
 	fmt.Println("  1. Run 'npm install' to enable PDF generation")
-	fmt.Println("  2. Run 'brag kb add' to add your profile information")
-	fmt.Println("  3. Run 'brag add' to track your first application")
+	fmt.Println("  2. Run 'bragger kb add' to add your profile information")
+	fmt.Println("  3. Run 'bragger add' to track your first application")
 }
 
 func copyTemplateFile(templatePath, destPath string, created, skipped *[]string) error {
@@ -187,11 +187,11 @@ func cmdUpgrade() {
 	}
 
 	// Check if workspace is initialized
-	bragDir := filepath.Join(cwd, ".brag")
+	bragDir := filepath.Join(cwd, ".bragger")
 	versionFile := filepath.Join(bragDir, "version")
 
 	if _, err := os.Stat(bragDir); os.IsNotExist(err) {
-		fmt.Println("Not a Brag workspace. Run 'brag init' first.")
+		fmt.Println("Not a Bragger workspace. Run 'bragger init' first.")
 		os.Exit(1)
 	}
 
@@ -283,15 +283,15 @@ func cmdUpgrade() {
 	fmt.Printf("\nUpgrade to v%s complete!\n", templates.Version)
 }
 
-// isWorkspaceInitialized checks if the current directory is a Brag workspace
+// isWorkspaceInitialized checks if the current directory is a Bragger workspace
 func isWorkspaceInitialized() bool {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return false
 	}
 
-	// Check for .brag directory or applications.jsonl
-	bragDir := filepath.Join(cwd, ".brag")
+	// Check for .bragger directory or applications.jsonl
+	bragDir := filepath.Join(cwd, ".bragger")
 	if _, err := os.Stat(bragDir); err == nil {
 		return true
 	}

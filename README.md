@@ -1,8 +1,8 @@
-# Brag
+# Bragger
 
 Job application tracker and AI-powered resume/cover letter generator.
 
-Brag helps you:
+Bragger helps you:
 - Track job applications with status, notes, and job descriptions
 - Maintain a knowledge base of your professional profile
 - Generate tailored resumes and cover letters using AI (with Claude/OpenCode skills)
@@ -14,21 +14,21 @@ Brag helps you:
 
 ```bash
 brew tap ewurch/tap
-brew install brag
+brew install bragger
 ```
 
 ### Go Install
 
 ```bash
-go install github.com/ewurch/brag/cmd/brag@latest
+go install github.com/ewurch/bragger/cmd/bragger@latest
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/ewurch/brag.git
-cd brag
-go build -o brag ./cmd/brag
+git clone https://github.com/ewurch/bragger.git
+cd bragger
+go build -o bragger ./cmd/bragger
 ```
 
 ## Quick Start
@@ -38,11 +38,11 @@ go build -o brag ./cmd/brag
 ```bash
 mkdir my-job-search
 cd my-job-search
-brag init
+bragger init
 ```
 
 This creates:
-- `.brag/` - Version tracking
+- `.bragger/` - Version tracking
 - `.claude/skills/` - AI agent skills for resume/cover letter generation
 - `AGENTS.md` - Instructions for AI agents
 - `applications.jsonl` - Application tracking data
@@ -60,15 +60,15 @@ npm install
 
 ```bash
 # Add contact info
-brag kb add --type profile --category contact \
+bragger kb add --type profile --category contact \
   --data '{"name":"Your Name","email":"you@example.com","location":"City, Country"}'
 
 # Add work experience
-brag kb add --type profile --category experience \
+bragger kb add --type profile --category experience \
   --data '{"company":"Acme Corp","role":"Senior Engineer","start_date":"2020-01","end_date":"present","highlights":["Led team of 5","Reduced latency by 40%"]}'
 
 # Add skills
-brag kb add --type profile --category skills \
+bragger kb add --type profile --category skills \
   --data '{"languages":["Go","Python"],"frameworks":["React","FastAPI"],"cloud":["AWS","GCP"]}'
 ```
 
@@ -76,16 +76,16 @@ brag kb add --type profile --category skills \
 
 ```bash
 # Add a new application
-brag add --company "Dream Company" --role "Staff Engineer" --jd-file job-description.txt
+bragger add --company "Dream Company" --role "Staff Engineer" --jd-file job-description.txt
 
 # List all applications
-brag list
+bragger list
 
 # Show details
-brag show app-a1b2c3d4
+bragger show app-a1b2c3d4
 
 # Update status
-brag update app-a1b2c3d4 --status "interviewing" --notes "Phone screen scheduled"
+bragger update app-a1b2c3d4 --status "interviewing" --notes "Phone screen scheduled"
 ```
 
 ### 5. Generate Resumes (with AI)
@@ -118,19 +118,19 @@ The PDF will be created and Finder will open with the file selected for easy upl
 
 | Command | Description |
 |---------|-------------|
-| `brag init` | Initialize a new workspace |
-| `brag add` | Add a new application |
-| `brag list` | List all applications |
-| `brag show <id>` | Show application details |
-| `brag update <id>` | Update an application |
-| `brag remove <id>` | Remove an application |
-| `brag kb show` | Show knowledge base entries |
-| `brag kb context` | Export KB in markdown (for AI) |
-| `brag kb add` | Add a KB entry |
-| `brag kb update <id>` | Update a KB entry |
-| `brag kb remove <id>` | Remove a KB entry |
-| `brag upgrade` | Upgrade workspace to latest version |
-| `brag help` | Show help |
+| `bragger init` | Initialize a new workspace |
+| `bragger add` | Add a new application |
+| `bragger list` | List all applications |
+| `bragger show <id>` | Show application details |
+| `bragger update <id>` | Update an application |
+| `bragger remove <id>` | Remove an application |
+| `bragger kb show` | Show knowledge base entries |
+| `bragger kb context` | Export KB in markdown (for AI) |
+| `bragger kb add` | Add a KB entry |
+| `bragger kb update <id>` | Update a KB entry |
+| `bragger kb remove <id>` | Remove a KB entry |
+| `bragger upgrade` | Upgrade workspace to latest version |
+| `bragger help` | Show help |
 
 ## Knowledge Base Categories
 
@@ -150,16 +150,16 @@ The PDF will be created and Finder will open with the file selected for easy upl
 Context entries store additional information that doesn't fit structured categories:
 
 ```bash
-brag kb add --type context --category achievement \
+bragger kb add --type context --category achievement \
   --content "Led migration to microservices, reducing latency by 40%"
 
-brag kb add --type context --category preference \
+bragger kb add --type context --category preference \
   --content "Prefer remote-first companies with async culture"
 ```
 
 ## AI Integration
 
-Brag includes Claude/OpenCode skills that enforce factual consistency:
+Bragger includes Claude/OpenCode skills that enforce factual consistency:
 
 1. **Pre-generation protocol**: AI must load KB and perform gap analysis
 2. **Strict factuality**: Every claim must trace to a KB entry
@@ -175,11 +175,11 @@ See `.claude/skills/` for detailed skill documentation.
 go test ./...
 
 # Build
-go build -o bin/brag ./cmd/brag
+go build -o bin/bragger ./cmd/bragger
 
 # Test in a new workspace
 mkdir /tmp/test-workspace && cd /tmp/test-workspace
-/path/to/bin/brag init
+/path/to/bin/bragger init
 ```
 
 ## License

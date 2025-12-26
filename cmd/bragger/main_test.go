@@ -581,7 +581,7 @@ func TestKBHelp(t *testing.T) {
 	// Should show help when no subcommand
 
 	expectedStrings := []string{
-		"brag kb <subcommand>",
+		"bragger kb <subcommand>",
 		"--type",
 		"--category",
 		"--data",

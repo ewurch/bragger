@@ -129,15 +129,15 @@ There's also a CLI tool at `./bin/app` for quick operations:
 
 ```bash
 # Interactive mode
-./bin/brag add
+./bin/bragger add
 
 # Flag mode (quick add)
-./bin/brag add --company "Company" --role "Job Title"
-./bin/brag add --company "Company" --role "Title" --jd-url "https://..." --notes "Referral"
+./bin/bragger add --company "Company" --role "Job Title"
+./bin/bragger add --company "Company" --role "Title" --jd-url "https://..." --notes "Referral"
 
 # Other commands
 ./bin/app list             # List all
-./bin/brag show <id>        # Show details
+./bin/bragger show <id>        # Show details
 ./bin/app update <id>      # Interactive update
 ./bin/app update <id> --status "interviewing"  # Flag mode (quick)
 ./bin/app remove <id>      # Remove with confirmation
@@ -184,7 +184,7 @@ Update any field using flags:
 Use `--status` and `--date` to add applications retroactively:
 
 ```bash
-./bin/brag add --company "OldCorp" --role "Engineer" --date "2025-01-15" --status "interviewing"
+./bin/bragger add --company "OldCorp" --role "Engineer" --date "2025-01-15" --status "interviewing"
 ```
 
 ### Adding JD Content
@@ -193,12 +193,12 @@ There are three ways to add job description content:
 
 1. **From file** (recommended for long JDs):
    ```bash
-   ./bin/brag add --company "Acme" --role "Engineer" --jd-file ./jd.txt
+   ./bin/bragger add --company "Acme" --role "Engineer" --jd-file ./jd.txt
    ```
 
 2. **Inline** (for short descriptions):
    ```bash
-   ./bin/brag add --company "Acme" --role "Engineer" --jd-content "Looking for..."
+   ./bin/bragger add --company "Acme" --role "Engineer" --jd-content "Looking for..."
    ```
 
 3. **Via Claude skill** (for fetching from URL):
