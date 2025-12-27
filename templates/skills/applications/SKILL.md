@@ -123,24 +123,24 @@ Answer questions about applications.
 - "Applications from last week"
 - "Did I apply to Google?"
 
-## CLI Tool
+## CLI Commands
 
-There's also a CLI tool at `./bin/app` for quick operations:
+Use the `bragger` CLI for quick operations:
 
 ```bash
 # Interactive mode
-./bin/bragger add
+bragger add
 
 # Flag mode (quick add)
-./bin/bragger add --company "Company" --role "Job Title"
-./bin/bragger add --company "Company" --role "Title" --jd-url "https://..." --notes "Referral"
+bragger add --company "Company" --role "Job Title"
+bragger add --company "Company" --role "Title" --jd-url "https://..." --notes "Referral"
 
 # Other commands
-./bin/app list             # List all
-./bin/bragger show <id>        # Show details
-./bin/app update <id>      # Interactive update
-./bin/app update <id> --status "interviewing"  # Flag mode (quick)
-./bin/app remove <id>      # Remove with confirmation
+bragger list             # List all
+bragger show <id>        # Show details
+bragger update <id>      # Interactive update
+bragger update <id> --status "interviewing"  # Flag mode (quick)
+bragger remove <id>      # Remove with confirmation
 ```
 
 ### Available flags for `add` and `update`:
@@ -170,13 +170,13 @@ Update any field using flags:
 
 ```bash
 # Update status
-./bin/app update app-xxx --status "interviewing"
+bragger update app-xxx --status "interviewing"
 
 # Update multiple fields
-./bin/app update app-xxx --status "offer" --notes "Accepted the offer!"
+bragger update app-xxx --status "offer" --notes "Accepted the offer!"
 
 # Add JD content later
-./bin/app update app-xxx --jd-file ./jd.txt
+bragger update app-xxx --jd-file ./jd.txt
 ```
 
 ### Backfilling Old Applications
@@ -184,7 +184,7 @@ Update any field using flags:
 Use `--status` and `--date` to add applications retroactively:
 
 ```bash
-./bin/bragger add --company "OldCorp" --role "Engineer" --date "2025-01-15" --status "interviewing"
+bragger add --company "OldCorp" --role "Engineer" --date "2025-01-15" --status "interviewing"
 ```
 
 ### Adding JD Content
@@ -193,12 +193,12 @@ There are three ways to add job description content:
 
 1. **From file** (recommended for long JDs):
    ```bash
-   ./bin/bragger add --company "Acme" --role "Engineer" --jd-file ./jd.txt
+   bragger add --company "Acme" --role "Engineer" --jd-file ./jd.txt
    ```
 
 2. **Inline** (for short descriptions):
    ```bash
-   ./bin/bragger add --company "Acme" --role "Engineer" --jd-content "Looking for..."
+   bragger add --company "Acme" --role "Engineer" --jd-content "Looking for..."
    ```
 
 3. **Via Claude skill** (for fetching from URL):
