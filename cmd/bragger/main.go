@@ -5,12 +5,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/tabwriter"
 	"time"
 
 	"github.com/ewurch/bragger/internal/models"
 	"github.com/ewurch/bragger/internal/storage"
+	"github.com/ewurch/bragger/templates"
 )
 
 // appFlags holds all the optional flags for add/update commands
@@ -132,6 +134,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Check for outdated workspace (skip for init/upgrade/help/version)
+	cmd := os.Args[1]
+	if cmd != "init" && cmd != "upgrade" && cmd != "help" && cmd != "version" {
+		checkAndWarnOutdatedWorkspace()
+	}
+
 	store := storage.New("")
 
 	kbStore := storage.NewKBStorage("")
@@ -163,6 +171,8 @@ func main() {
 		cmdShow(store, os.Args[2])
 	case "upgrade":
 		cmdUpgrade()
+	case "version":
+		cmdVersion()
 	case "kb":
 		if len(os.Args) < 3 {
 			printKBUsage()
@@ -193,6 +203,7 @@ Commands:
   remove <id>      Remove an application
   kb <subcommand>  Manage candidate knowledge base (run 'bragger kb' for details)
   upgrade          Upgrade workspace to latest version
+  version          Show CLI and workspace version
   help             Show this help message
 
 Flags for add command (optional - without flags, runs interactively):
@@ -502,4 +513,56 @@ func truncate(s string, max int) string {
 		return s
 	}
 	return s[:max-3] + "..."
+}
+
+// cmdVersion prints the CLI version and workspace version (if initialized)
+func cmdVersion() {
+	fmt.Printf("CLI version:       v%s\n", templates.Version)
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Workspace version: (unable to determine)")
+		return
+	}
+
+	versionFile := filepath.Join(cwd, ".bragger", "version")
+	versionBytes, err := os.ReadFile(versionFile)
+	if err != nil {
+		fmt.Println("Workspace version: (not initialized)")
+		return
+	}
+
+	workspaceVersion := strings.TrimSpace(string(versionBytes))
+	if workspaceVersion == templates.Version {
+		fmt.Printf("Workspace version: v%s (up to date)\n", workspaceVersion)
+	} else {
+		fmt.Printf("Workspace version: v%s (outdated, run 'bragger upgrade')\n", workspaceVersion)
+	}
+}
+
+// checkAndWarnOutdatedWorkspace prints a warning to stderr if the workspace
+// has outdated templates. Can be suppressed with BRAGGER_NO_UPGRADE_NOTICE=1.
+func checkAndWarnOutdatedWorkspace() {
+	// Check if warning is suppressed via environment variable
+	if os.Getenv("BRAGGER_NO_UPGRADE_NOTICE") == "1" {
+		return
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		return // silently fail
+	}
+
+	versionFile := filepath.Join(cwd, ".bragger", "version")
+	versionBytes, err := os.ReadFile(versionFile)
+	if err != nil {
+		return // workspace not initialized or no version file
+	}
+
+	currentVersion := strings.TrimSpace(string(versionBytes))
+	if currentVersion != templates.Version {
+		fmt.Fprintf(os.Stderr,
+			"Note: Workspace templates are outdated (v%s -> v%s). Run 'bragger upgrade' to update.\n\n",
+			currentVersion, templates.Version)
+	}
 }
