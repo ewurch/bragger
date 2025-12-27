@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -169,6 +170,8 @@ func main() {
 			os.Exit(1)
 		}
 		cmdShow(store, os.Args[2])
+	case "stats":
+		cmdStats(store)
 	case "upgrade":
 		cmdUpgrade()
 	case "version":
@@ -201,6 +204,7 @@ Commands:
   show <id>        Show details of an application
   update <id>      Update an application
   remove <id>      Remove an application
+  stats            Show application statistics
   kb <subcommand>  Manage candidate knowledge base (run 'bragger kb' for details)
   upgrade          Upgrade workspace to latest version
   version          Show CLI and workspace version
@@ -538,6 +542,128 @@ func cmdVersion() {
 	} else {
 		fmt.Printf("Workspace version: v%s (outdated, run 'bragger upgrade')\n", workspaceVersion)
 	}
+}
+
+// cmdStats displays application statistics
+func cmdStats(store *storage.Storage) {
+	apps, err := store.Load()
+	if err != nil {
+		fmt.Printf("Error loading applications: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Empty state
+	if len(apps) == 0 {
+		fmt.Println("No applications yet.")
+		fmt.Println("Run 'bragger add' to track your first application.")
+		return
+	}
+
+	// Count by status
+	statusCounts := map[models.Status]int{
+		models.StatusApplied:      0,
+		models.StatusInterviewing: 0,
+		models.StatusRejected:     0,
+		models.StatusOffer:        0,
+	}
+	for _, app := range apps {
+		statusCounts[app.Status]++
+	}
+
+	// Count by month
+	monthCounts := make(map[string]int)
+	for _, app := range apps {
+		if len(app.DateApplied) >= 7 {
+			month := app.DateApplied[:7] // YYYY-MM
+			monthCounts[month]++
+		}
+	}
+
+	// Sort months descending (newest first)
+	months := make([]string, 0, len(monthCounts))
+	for month := range monthCounts {
+		months = append(months, month)
+	}
+	sort.Sort(sort.Reverse(sort.StringSlice(months)))
+
+	// Limit to last 6 months
+	if len(months) > 6 {
+		months = months[:6]
+	}
+
+	total := len(apps)
+
+	// Find max count for bar scaling
+	maxCount := 0
+	for _, count := range statusCounts {
+		if count > maxCount {
+			maxCount = count
+		}
+	}
+
+	// Print header
+	fmt.Println("Application Statistics")
+	fmt.Println("======================")
+	fmt.Println()
+
+	// Print status breakdown
+	fmt.Println("By Status:")
+	statuses := []models.Status{
+		models.StatusApplied,
+		models.StatusInterviewing,
+		models.StatusRejected,
+		models.StatusOffer,
+	}
+
+	for _, status := range statuses {
+		count := statusCounts[status]
+		pct := float64(count) / float64(total) * 100
+		bar := renderBar(count, maxCount, 20)
+		fmt.Printf("  %-14s %3d  %-20s  %5.1f%%\n", string(status)+":", count, bar, pct)
+	}
+
+	fmt.Println("  ─────────────────────────────────────────────")
+	fmt.Printf("  %-14s %3d\n", "Total:", total)
+	fmt.Println()
+
+	// Print monthly breakdown
+	if len(months) > 0 {
+		fmt.Println("By Month (last 6 months):")
+		for _, month := range months {
+			count := monthCounts[month]
+			label := "applications"
+			if count == 1 {
+				label = "application"
+			}
+			fmt.Printf("  %s:  %2d %s\n", month, count, label)
+		}
+		fmt.Println()
+	}
+
+	// Calculate metrics
+	responded := statusCounts[models.StatusInterviewing] + statusCounts[models.StatusRejected] + statusCounts[models.StatusOffer]
+	interviewed := statusCounts[models.StatusInterviewing] + statusCounts[models.StatusOffer]
+	offers := statusCounts[models.StatusOffer]
+
+	responseRate := float64(responded) / float64(total) * 100
+	interviewRate := float64(interviewed) / float64(total) * 100
+	offerRate := float64(offers) / float64(total) * 100
+
+	fmt.Printf("Response Rate: %.0f%% (%d of %d received a response)\n", responseRate, responded, total)
+	fmt.Printf("Interview Rate: %.0f%% (%d of %d reached interview stage or beyond)\n", interviewRate, interviewed, total)
+	fmt.Printf("Offer Rate: %.0f%% (%d of %d)\n", offerRate, offers, total)
+}
+
+// renderBar creates an ASCII bar chart
+func renderBar(count, maxCount, maxWidth int) string {
+	if maxCount == 0 || count == 0 {
+		return ""
+	}
+	width := (count * maxWidth) / maxCount
+	if width == 0 && count > 0 {
+		width = 1 // Ensure at least 1 char for non-zero counts
+	}
+	return strings.Repeat("█", width)
 }
 
 // checkAndWarnOutdatedWorkspace prints a warning to stderr if the workspace

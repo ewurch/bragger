@@ -6,4 +6,4 @@ import "embed"
 var Files embed.FS
 
 // Version is the current version of Bragger
-const Version = "0.3.1"
+const Version = "0.4.0"
