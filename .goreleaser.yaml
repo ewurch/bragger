@@ -41,20 +41,26 @@ changelog:
       - "^test:"
       - "^chore:"
 
-brews:
+homebrew_casks:
   - name: bragger
     repository:
       owner: ewurch
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    directory: Formula
+    directory: Casks
     homepage: "https://github.com/ewurch/bragger"
     description: "Job application tracker and AI-powered resume generator"
-    license: "MIT"
-    install: |
-      bin.install "bragger"
-    test: |
-      system "#{bin}/bragger", "version"
+    url:
+      verified: github.com/ewurch/bragger
+    binaries:
+      - bragger
+    # Required for unsigned binaries
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/bragger"]
+          end
 
 release:
   github:
